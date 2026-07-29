@@ -1,0 +1,31 @@
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap");
+@import "tailwindcss";
+
+@theme {
+  /* Hero-only palette — the hero section stays black, matching the logo. */
+  --color-void: #050505;
+  --color-void-text: #fafaf9;
+  --color-void-muted: #b8b8b3;
+
+  /* Site-wide light theme — everything below the hero. */
+  --color-canvas: #fafaf9;
+  --color-graphite: #111110;
+  --color-slate: #6f6f6a;
+  --color-hairline: #e6e6e1;
+  --color-hairline-strong: #c9c9c3;
+
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-serif: "Playfair Display", serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+html {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-graphite);
+  font-family: var(--font-body);
+}
