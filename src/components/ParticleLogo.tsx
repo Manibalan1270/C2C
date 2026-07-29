@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
-import type { MotionValue } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { animate, type MotionValue } from "framer-motion";
 import clubLogo from "../assets/club-logo-transparent.png";
 
 interface Particle {
@@ -13,16 +13,18 @@ const CANVAS_SIZE = 320;
 const SAMPLE_STEP = 4; // grid step over the sampled logo — bigger = fewer particles
 
 /**
- * Renders the logo as a field of particles. Particle position is a pure
- * function of `progress` (0 = formed logo, 1 = fully scattered/faded) —
- * there is no free-running animation loop. The canvas only redraws when
- * `progress` changes, which Framer Motion already keeps in sync with
- * scroll via requestAnimationFrame, so this doesn't add a second,
- * independent per-frame loop competing for the frame budget.
+ * On mount, particles fly in from random directions and converge into the
+ * logo (a bounded, one-shot animation via Framer Motion's `animate()` —
+ * not a free-running loop). Once formed, it swaps to the actual crisp PNG
+ * so the logo stays fully legible at rest, not a sparse dot field. From
+ * then on, scroll progress (passed in as `progress`) takes over — breaking
+ * the logo back apart into particles as you scroll down, same as before.
  */
 export default function ParticleLogo({ progress }: { progress: MotionValue<number> }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const particlesRef = useRef<Particle[] | null>(null);
+  const entranceDoneRef = useRef(false);
+  const [showCrisp, setShowCrisp] = useState(false);
 
   useEffect(() => {
     function draw(p: number) {
@@ -78,20 +80,49 @@ export default function ParticleLogo({ progress }: { progress: MotionValue<numbe
         }
       }
       particlesRef.current = particles;
-      draw(progress.get());
+      draw(1); // start fully scattered
+
+      const controls = animate(1, 0, {
+        duration: 1.3,
+        ease: [0.16, 1, 0.3, 1], // easeOutExpo-ish — fast start, gentle settle
+        onUpdate: draw,
+        onComplete: () => {
+          entranceDoneRef.current = true;
+          const v = progress.get();
+          draw(v);
+          setShowCrisp(v <= 0.01);
+        },
+      });
+
+      return () => controls.stop();
     };
 
-    const unsubscribe = progress.on("change", draw);
+    const unsubscribe = progress.on("change", (v) => {
+      if (!entranceDoneRef.current) return;
+      draw(v);
+      setShowCrisp(v <= 0.01);
+    });
     return () => unsubscribe();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
-    <canvas
-      ref={canvasRef}
-      width={CANVAS_SIZE}
-      height={CANVAS_SIZE}
-      className="h-56 w-56 sm:h-80 sm:w-80"
-    />
+    <div className="relative h-56 w-56 sm:h-80 sm:w-80">
+      {showCrisp && (
+        <img
+          src={clubLogo}
+          alt="C2C Programming Club"
+          className="absolute inset-0 h-full w-full object-contain"
+        />
+      )}
+      <canvas
+        ref={canvasRef}
+        width={CANVAS_SIZE}
+        height={CANVAS_SIZE}
+        className={`absolute inset-0 h-full w-full object-contain ${
+          showCrisp ? "opacity-0" : "opacity-100"
+        }`}
+      />
+    </div>
   );
 }
