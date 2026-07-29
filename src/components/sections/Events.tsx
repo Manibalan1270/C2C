@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import SectionHeading from "../SectionHeading";
-import Carousel from "../Carousel";
 
 const EVENTS = [
   {
@@ -22,42 +21,37 @@ const EVENTS = [
 
 export default function Events() {
   return (
-    <section id="events" className="py-24">
-      <div className="mx-auto max-w-5xl px-6">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.4 }}
-          transition={{ duration: 0.6 }}
-        >
-          <SectionHeading>Events</SectionHeading>
-        </motion.div>
+    <section id="events" className="mx-auto max-w-5xl px-6 py-24">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.4 }}
+        transition={{ duration: 0.6 }}
+      >
+        <SectionHeading>Events</SectionHeading>
+      </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, amount: 0.2 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="mt-10"
-        >
-          <Carousel
-            items={EVENTS}
-            tone="dark"
-            renderItem={(event) => (
-              <div className="rounded-3xl border border-hairline bg-graphite p-6 sm:p-8">
-                <div className="flex aspect-[4/3] w-full -rotate-2 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
-                  <span className="font-mono text-xs uppercase tracking-widest text-white/30">
-                    Event Photo
-                  </span>
-                </div>
-                <h3 className="mt-6 font-display text-2xl font-semibold text-white">
-                  {event.title}
-                </h3>
-                <p className="mt-3 text-sm text-white/70">{event.description}</p>
-              </div>
-            )}
-          />
-        </motion.div>
+      <div className="mt-10 grid gap-6 sm:grid-cols-3">
+        {EVENTS.map((event, i) => (
+          <motion.div
+            key={event.title}
+            initial={{ opacity: 0, y: 24 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5, delay: i * 0.1 }}
+            className="rounded-2xl bg-stone-200/80 p-6"
+          >
+            <div className="flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-stone-300/60">
+              <span className="font-mono text-xs uppercase tracking-widest text-stone-500">
+                Event Photo
+              </span>
+            </div>
+            <h3 className="mt-5 font-display text-xl font-semibold text-graphite">
+              {event.title}
+            </h3>
+            <p className="mt-3 text-sm text-slate">{event.description}</p>
+          </motion.div>
+        ))}
       </div>
     </section>
   );

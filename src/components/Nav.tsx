@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
 import clubLogo from "../assets/club-logo-transparent.png";
 import { HERO_VH_MULTIPLIER } from "../lib/layout";
 
@@ -38,31 +39,39 @@ export default function Nav() {
       }}
     >
       <div className="flex items-center gap-8 rounded-full border border-hairline bg-canvas/90 px-4 py-2 shadow-sm backdrop-blur">
-        <img
+        <motion.img
           src={clubLogo}
           alt="C2C logo"
+          whileHover={{ scale: 1.2, rotate: -8 }}
+          transition={{ type: "spring", stiffness: 400, damping: 12 }}
           className="h-8 w-8 rounded-full border border-hairline-strong object-contain p-0.5 invert"
         />
 
         <ul className="hidden items-center gap-6 sm:flex">
           {NAV_LINKS.map((link) => (
             <li key={link.label}>
-              <a
+              <motion.a
                 href={link.href}
-                className="font-body text-sm text-slate transition hover:text-graphite"
+                whileHover={{ scale: 1.15 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: "spring", stiffness: 400, damping: 12 }}
+                className="inline-block font-body text-sm text-slate transition-colors hover:text-graphite"
               >
                 {link.label}
-              </a>
+              </motion.a>
             </li>
           ))}
         </ul>
 
-        <button
+        <motion.button
           onClick={() => navigate("/login")}
-          className="rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-white transition hover:bg-accent-dark"
+          whileHover={{ scale: 1.08 }}
+          whileTap={{ scale: 0.96 }}
+          transition={{ type: "spring", stiffness: 400, damping: 12 }}
+          className="rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-white transition-colors hover:bg-accent-dark"
         >
           Compete
-        </button>
+        </motion.button>
       </div>
     </nav>
   );
