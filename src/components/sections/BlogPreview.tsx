@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import SectionHeading from "../SectionHeading";
+import Carousel from "../Carousel";
 
 const MOCK_POSTS = [
   {
@@ -21,35 +22,40 @@ const MOCK_POSTS = [
 
 export default function BlogPreview() {
   return (
-    <section id="blog" className="mx-auto max-w-5xl px-6 py-24">
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.4 }}
-        transition={{ duration: 0.6 }}
-      >
-        <SectionHeading>Blog</SectionHeading>
-      </motion.div>
+    <section id="blog" className="py-24">
+      <div className="mx-auto max-w-5xl px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.4 }}
+          transition={{ duration: 0.6 }}
+        >
+          <SectionHeading>Blog</SectionHeading>
+        </motion.div>
 
-      <div className="mt-10 grid gap-6 sm:grid-cols-3">
-        {MOCK_POSTS.map((post, i) => (
-          <motion.article
-            key={post.title}
-            initial={{ opacity: 0, y: 24 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, amount: 0.3 }}
-            transition={{ duration: 0.5, delay: i * 0.1 }}
-            className="rounded-2xl border border-hairline bg-canvas p-6"
-          >
-            <span className="font-mono text-xs uppercase tracking-wider text-slate">
-              {post.category}
-            </span>
-            <h3 className="mt-3 font-display text-lg font-semibold text-graphite">
-              {post.title}
-            </h3>
-            <p className="mt-3 text-sm text-slate">{post.excerpt}</p>
-          </motion.article>
-        ))}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="mt-10"
+        >
+          <Carousel
+            items={MOCK_POSTS}
+            tone="light"
+            renderItem={(post) => (
+              <article className="rounded-2xl border border-hairline bg-canvas p-6 sm:p-8">
+                <span className="font-mono text-xs uppercase tracking-wider text-slate">
+                  {post.category}
+                </span>
+                <h3 className="mt-3 font-display text-xl font-semibold text-graphite">
+                  {post.title}
+                </h3>
+                <p className="mt-3 text-sm text-slate">{post.excerpt}</p>
+              </article>
+            )}
+          />
+        </motion.div>
       </div>
     </section>
   );
