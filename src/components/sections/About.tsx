@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import SectionHeading from "../SectionHeading";
+import RobotMascot from "../RobotMascot";
 import { useTypewriter } from "../../hooks/useTypewriter";
 
 const SPEED = 16;
@@ -9,29 +10,6 @@ const PARA_1 =
   "C2C — Compete to Compute — is where curious minds sharpen their craft. We're building a community of coders who solve problems, ship projects, and push each other to get better every week.";
 const PARA_2 =
   "Weekly challenges, coding roadmaps, hackathon teams, and a leaderboard that actually means something — all built by members, for members.";
-
-function RobotMascot() {
-  return (
-    <svg
-      viewBox="0 0 200 240"
-      className="h-32 w-32 text-white/25 sm:h-44 sm:w-44"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="4"
-      strokeLinecap="round"
-    >
-      <circle cx="100" cy="12" r="4" fill="currentColor" stroke="none" />
-      <line x1="100" y1="16" x2="100" y2="32" />
-      <rect x="30" y="32" width="140" height="120" rx="36" />
-      <path d="M60 90 Q75 108 90 90" />
-      <path d="M110 90 Q125 108 140 90" />
-      <rect x="10" y="70" width="14" height="40" rx="7" />
-      <rect x="176" y="70" width="14" height="40" rx="7" />
-      <rect x="55" y="160" width="90" height="60" rx="20" />
-      <circle cx="100" cy="190" r="14" />
-    </svg>
-  );
-}
 
 export default function About() {
   // Typing starts once (when the terminal scrolls into view), then plays
