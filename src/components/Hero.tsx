@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
-import clubLogo from "../assets/club-logo.jpeg";
+import clubLogo from "../assets/club-logo-transparent.png";
 import { HERO_VH_MULTIPLIER } from "../lib/layout";
 
 /**
@@ -18,10 +18,13 @@ export default function Hero() {
     offset: ["start start", "end start"],
   });
 
-  const logoY = useTransform(scrollYProgress, [0, 0.45], [0, -200]);
-  const logoScale = useTransform(scrollYProgress, [0, 0.45], [1, 0.4]);
-  const textOpacity = useTransform(scrollYProgress, [0.25, 0.6], [0, 1]);
-  const textY = useTransform(scrollYProgress, [0.25, 0.6], [30, 0]);
+  const logoY = useTransform(scrollYProgress, [0, 0.4], [0, -200]);
+  const logoScale = useTransform(scrollYProgress, [0, 0.4], [1, 0.4]);
+  // Narrow window (not 0.25→0.6) so the text snaps in quickly instead of
+  // lingering half-transparent — a white element at partial opacity on a
+  // black background reads as dim gray, which is what looked "off".
+  const textOpacity = useTransform(scrollYProgress, [0.38, 0.5], [0, 1]);
+  const textY = useTransform(scrollYProgress, [0.38, 0.5], [20, 0]);
 
   return (
     <div
@@ -34,7 +37,7 @@ export default function Hero() {
           src={clubLogo}
           alt="C2C Programming Club"
           style={{ y: logoY, scale: logoScale }}
-          className="h-48 w-48 rounded-2xl object-cover sm:h-64 sm:w-64"
+          className="h-48 w-48 object-contain sm:h-64 sm:w-64"
         />
 
         <motion.div

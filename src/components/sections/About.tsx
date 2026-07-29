@@ -1,3 +1,4 @@
+import { motion } from "framer-motion";
 import SectionHeading from "../SectionHeading";
 
 function RobotMascot() {
@@ -26,9 +27,21 @@ function RobotMascot() {
 export default function About() {
   return (
     <section id="about" className="mx-auto max-w-5xl px-6 py-24">
-      <SectionHeading>About Us</SectionHeading>
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.4 }}
+        transition={{ duration: 0.6 }}
+      >
+        <SectionHeading>About Us</SectionHeading>
+      </motion.div>
 
-      <div className="mt-10 overflow-hidden rounded-3xl border border-hairline bg-graphite shadow-xl">
+      <motion.div
+        initial={{ opacity: 0, y: 24 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.2 }}
+        transition={{ duration: 0.6, delay: 0.1 }}
+        className="mt-10 overflow-hidden rounded-3xl border border-hairline bg-graphite shadow-xl">
         <div className="relative flex items-center border-b border-white/10 px-4 py-3">
           <div className="flex items-center gap-2">
             <span className="h-3 w-3 rounded-full bg-red-500/80" />
@@ -63,7 +76,7 @@ export default function About() {
             <RobotMascot />
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

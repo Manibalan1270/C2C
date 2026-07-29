@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import clubLogo from "../assets/club-logo.jpeg";
+import clubLogo from "../assets/club-logo-transparent.png";
 
 export default function LoginPage() {
   return (
@@ -9,7 +9,7 @@ export default function LoginPage() {
           <img
             src={clubLogo}
             alt="C2C logo"
-            className="h-16 w-16 rounded-full border border-hairline-strong object-cover invert"
+            className="h-16 w-16 rounded-full border border-hairline-strong object-contain p-1 invert"
           />
           <h1 className="mt-4 font-display text-2xl font-semibold text-graphite">
             Welcome back

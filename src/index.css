@@ -29,3 +29,13 @@ body {
   color: var(--color-graphite);
   font-family: var(--font-body);
 }
+
+/* Used by the Events / Board Members sliders — native CSS scroll-snap,
+   no JS, so it can't reintroduce the scroll-jank problems we've had. */
+.scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

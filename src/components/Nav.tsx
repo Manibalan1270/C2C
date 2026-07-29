@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import clubLogo from "../assets/club-logo.jpeg";
+import { useNavigate } from "react-router-dom";
+import clubLogo from "../assets/club-logo-transparent.png";
 import { HERO_VH_MULTIPLIER } from "../lib/layout";
 
 const NAV_LINKS = [
@@ -10,6 +11,7 @@ const NAV_LINKS = [
 ];
 
 export default function Nav() {
+  const navigate = useNavigate();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -39,7 +41,7 @@ export default function Nav() {
         <img
           src={clubLogo}
           alt="C2C logo"
-          className="h-8 w-8 rounded-full border border-hairline-strong object-cover invert"
+          className="h-8 w-8 rounded-full border border-hairline-strong object-contain p-0.5 invert"
         />
 
         <ul className="hidden items-center gap-6 sm:flex">
@@ -54,6 +56,13 @@ export default function Nav() {
             </li>
           ))}
         </ul>
+
+        <button
+          onClick={() => navigate("/login")}
+          className="rounded-full bg-graphite px-4 py-1.5 text-sm font-medium text-canvas transition hover:bg-slate"
+        >
+          Compete
+        </button>
       </div>
     </nav>
   );
