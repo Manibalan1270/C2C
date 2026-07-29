@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform, easeInOut, cubicBezier } from "framer-motion";
 import clubLogo from "../assets/club-logo-transparent.png";
 import { HERO_VH_MULTIPLIER } from "../lib/layout";
-import { FloatingPaths } from "./ui/background-paths";
+import { HeroLines } from "./ui/hero-lines";
 
 // A "back out" curve — slight overshoot then settle — for the text's pop-in.
 const POP_EASE = cubicBezier(0.34, 1.56, 0.64, 1);
@@ -38,18 +38,10 @@ export default function Hero() {
       style={{ height: `${HERO_VH_MULTIPLIER * 100}vh` }}
     >
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden px-6">
-        {/* Landing page uses a single layer confined to the right half of
-            the screen (Login keeps the full-width, two-layer version). The
-            mask feathers the left edge so the bundle emerges from mid-screen
-            instead of being cut off by a hard vertical line. */}
-        <div
-          className="absolute inset-y-0 left-1/2 right-0 text-void-text"
-          style={{
-            maskImage: "linear-gradient(to right, transparent, black 22%)",
-            WebkitMaskImage: "linear-gradient(to right, transparent, black 22%)",
-          }}
-        >
-          <FloatingPaths position={1} />
+        {/* Sparse sweeping lines across the full width, matching the
+            sketched reference. Login keeps its own denser FloatingPaths. */}
+        <div className="absolute inset-0 text-void-text">
+          <HeroLines />
         </div>
 
         <motion.img
