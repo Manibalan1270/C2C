@@ -1,47 +1,76 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 interface CarouselProps<T> {
   items: T[];
   renderItem: (item: T) => ReactNode;
-  /** Light or dark accent card — controls the arrow button styling. */
+  /** Light or dark accent card — controls the edge/indicator styling. */
   tone?: "light" | "dark";
 }
 
+/** How long to hold before the next item advances while hovering. */
+const HOVER_STEP_MS = 1100;
+
+function Chevron({ dir }: { dir: "left" | "right" }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-4 w-4"
+    >
+      <path d={dir === "left" ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7"} />
+    </svg>
+  );
+}
+
 /**
- * One item focused at a time, with left/right arrow navigation and a
- * direction-aware slide transition. Only `x` (transform) and `opacity`
- * are animated, and the transition is click-triggered rather than
- * scroll-linked, so there's no continuous per-frame work — same safe
- * pattern as the rest of the site's motion.
+ * One item focused at a time. Hovering either edge scrolls that way and
+ * keeps stepping while the pointer stays there; the edges are still real
+ * buttons, so click and keyboard focus work too (hover alone would leave
+ * touch and keyboard users stranded). Only `x` and `opacity` animate, and
+ * only in response to input — no continuous per-frame work.
  */
 export default function Carousel<T>({ items, renderItem, tone = "light" }: CarouselProps<T>) {
   const [index, setIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const timerRef = useRef<number | null>(null);
 
   function go(delta: number) {
     setDirection(delta);
     setIndex((prev) => (prev + delta + items.length) % items.length);
   }
 
-  const arrowClass =
+  function stopStepping() {
+    if (timerRef.current !== null) {
+      window.clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  }
+
+  function startStepping(delta: number) {
+    go(delta);
+    stopStepping();
+    timerRef.current = window.setInterval(() => go(delta), HOVER_STEP_MS);
+  }
+
+  // Never leave an interval running if the component goes away mid-hover.
+  useEffect(() => stopStepping, []);
+
+  const edgeBase =
+    "group absolute inset-y-0 z-10 flex w-16 items-center justify-center focus:outline-none sm:w-20";
+  const chevronBase =
     tone === "dark"
-      ? "border-white/15 text-white hover:bg-white/10"
-      : "border-hairline-strong text-graphite hover:bg-hairline";
+      ? "border-white/15 bg-white/5 text-white/70 group-hover:border-white/40 group-hover:text-white"
+      : "border-hairline bg-surface/80 text-slate group-hover:border-accent group-hover:text-accent";
 
   return (
     <div className="flex flex-col items-center">
-      <div className="flex w-full items-center justify-center gap-4 sm:gap-8">
-        <button
-          type="button"
-          onClick={() => go(-1)}
-          aria-label="Previous"
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-lg transition ${arrowClass}`}
-        >
-          ←
-        </button>
-
-        <div className="relative w-full max-w-sm overflow-hidden sm:max-w-md">
+      <div className="relative mx-auto w-full max-w-sm sm:max-w-md">
+        <div className="overflow-hidden">
           <AnimatePresence mode="wait" custom={direction} initial={false}>
             <motion.div
               key={index}
@@ -58,11 +87,36 @@ export default function Carousel<T>({ items, renderItem, tone = "light" }: Carou
 
         <button
           type="button"
-          onClick={() => go(1)}
-          aria-label="Next"
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full border text-lg transition ${arrowClass}`}
+          aria-label="Previous"
+          onMouseEnter={() => startStepping(-1)}
+          onMouseLeave={stopStepping}
+          onFocus={() => startStepping(-1)}
+          onBlur={stopStepping}
+          onClick={() => go(-1)}
+          className={`${edgeBase} left-0 -translate-x-1/3 sm:-translate-x-1/2`}
         >
-          →
+          <span
+            className={`flex h-10 w-10 items-center justify-center rounded-full border opacity-0 backdrop-blur transition-all duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 ${chevronBase}`}
+          >
+            <Chevron dir="left" />
+          </span>
+        </button>
+
+        <button
+          type="button"
+          aria-label="Next"
+          onMouseEnter={() => startStepping(1)}
+          onMouseLeave={stopStepping}
+          onFocus={() => startStepping(1)}
+          onBlur={stopStepping}
+          onClick={() => go(1)}
+          className={`${edgeBase} right-0 translate-x-1/3 sm:translate-x-1/2`}
+        >
+          <span
+            className={`flex h-10 w-10 items-center justify-center rounded-full border opacity-0 backdrop-blur transition-all duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 ${chevronBase}`}
+          >
+            <Chevron dir="right" />
+          </span>
         </button>
       </div>
 
