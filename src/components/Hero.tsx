@@ -18,13 +18,14 @@ export default function Hero() {
     offset: ["start start", "end start"],
   });
 
-  const logoY = useTransform(scrollYProgress, [0, 0.42], [0, -200], { ease: [easeInOut] });
-  const logoScale = useTransform(scrollYProgress, [0, 0.42], [1, 0.4], { ease: [easeInOut] });
-  // Wide enough to feel smooth, narrow enough that it doesn't linger
-  // half-transparent (a white element at partial opacity on black reads
-  // as dim gray) — plus an eased curve instead of a linear ramp.
-  const textOpacity = useTransform(scrollYProgress, [0.34, 0.54], [0, 1], { ease: [easeInOut] });
-  const textY = useTransform(scrollYProgress, [0.34, 0.54], [24, 0], { ease: [easeInOut] });
+  // Hero is tall (HERO_VH_MULTIPLIER) so the black background has room to
+  // breathe, but the logo->text transition itself should feel immediate —
+  // it completes within the first ~15% of that scroll distance, then the
+  // details stay visible/settled for the rest of the hero.
+  const logoY = useTransform(scrollYProgress, [0, 0.14], [0, -200], { ease: [easeInOut] });
+  const logoScale = useTransform(scrollYProgress, [0, 0.14], [1, 0.4], { ease: [easeInOut] });
+  const textOpacity = useTransform(scrollYProgress, [0.07, 0.17], [0, 1], { ease: [easeInOut] });
+  const textY = useTransform(scrollYProgress, [0.07, 0.17], [16, 0], { ease: [easeInOut] });
 
   return (
     <div
