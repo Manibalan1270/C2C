@@ -64,27 +64,3 @@ body {
 .animate-aurora {
   animation: aurora-breathe 7s ease-in-out infinite alternate;
 }
-
-/* One-time hero "vibrate" when the logo finishes breaking apart —
-   bounded duration, transform only, triggered by a class toggle. */
-@keyframes site-shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  20% {
-    transform: translateX(-6px);
-  }
-  40% {
-    transform: translateX(5px);
-  }
-  60% {
-    transform: translateX(-4px);
-  }
-  80% {
-    transform: translateX(3px);
-  }
-}
-.animate-shake {
-  animation: site-shake 0.4s ease-in-out;
-}

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import SectionHeading from "../SectionHeading";
-import { InfiniteSlider } from "../ui/infinite-slider";
+import Carousel from "../Carousel";
 
 const EVENTS = [
   {
@@ -32,34 +32,33 @@ export default function Events() {
         >
           <SectionHeading>Events</SectionHeading>
         </motion.div>
-      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-        className="mt-10"
-      >
-        <InfiniteSlider gap={24} duration={30} durationOnHover={75} className="py-2">
-          {EVENTS.map((event) => (
-            <div
-              key={event.title}
-              className="w-[320px] shrink-0 rounded-2xl bg-stone-200/80 p-6"
-            >
-              <div className="flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-stone-300/60">
-                <span className="font-mono text-xs uppercase tracking-widest text-stone-500">
-                  Event Photo
-                </span>
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="mt-10"
+        >
+          <Carousel
+            items={EVENTS}
+            tone="light"
+            renderItem={(event) => (
+              <div className="rounded-2xl bg-stone-200/80 p-6 sm:p-8">
+                <div className="flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-stone-300/60">
+                  <span className="font-mono text-xs uppercase tracking-widest text-stone-500">
+                    Event Photo
+                  </span>
+                </div>
+                <h3 className="mt-5 font-display text-xl font-semibold text-graphite">
+                  {event.title}
+                </h3>
+                <p className="mt-3 text-sm text-slate">{event.description}</p>
               </div>
-              <h3 className="mt-5 font-display text-xl font-semibold text-graphite">
-                {event.title}
-              </h3>
-              <p className="mt-3 text-sm text-slate">{event.description}</p>
-            </div>
-          ))}
-        </InfiniteSlider>
-      </motion.div>
+            )}
+          />
+        </motion.div>
+      </div>
     </section>
   );
 }
