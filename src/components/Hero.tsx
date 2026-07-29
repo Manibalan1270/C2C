@@ -37,27 +37,31 @@ export default function Hero() {
           src={clubLogo}
           alt="C2C Programming Club"
           style={{ y: logoY, scale: logoScale }}
-          className="h-48 w-48 object-contain sm:h-64 sm:w-64"
+          className="h-56 w-56 object-contain sm:h-80 sm:w-80"
         />
 
+        {/* Anchored at 44% (not 60%) with tightened spacing below, so the
+            full text + button block always fits inside the remaining
+            viewport height instead of the button clipping into the next
+            section on shorter screens. */}
         <motion.div
           style={{ opacity: textOpacity, y: textY }}
-          className="absolute inset-x-0 top-[60%] flex flex-col items-center px-6 text-center"
+          className="absolute inset-x-0 top-[44%] flex flex-col items-center px-6 text-center"
         >
           <p className="font-mono text-xs uppercase tracking-[0.3em] text-void-muted">
             Compete to Compute
           </p>
-          <h1 className="mt-4 font-display text-5xl font-semibold tracking-tight sm:text-7xl">
+          <h1 className="mt-3 font-display text-4xl font-semibold tracking-tight sm:text-6xl">
             C2C Programming Club
           </h1>
-          <p className="mt-6 max-w-xl text-base text-void-muted sm:text-lg">
+          <p className="mt-4 max-w-xl text-sm text-void-muted sm:text-lg">
             Where curiosity meets code. Solve, compete, and level up with a community
             built for people who love to build.
           </p>
 
           <a
             href="#about"
-            className="mt-10 rounded-full border border-void-muted px-6 py-3 text-sm font-medium text-void-text transition hover:bg-white/10"
+            className="mt-6 rounded-full border border-void-muted px-6 py-3 text-sm font-medium text-void-text transition hover:bg-white/10"
           >
             Explore More
           </a>

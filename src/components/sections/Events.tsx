@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import SectionHeading from "../SectionHeading";
+import Carousel from "../Carousel";
 
 const EVENTS = [
   {
@@ -31,36 +32,33 @@ export default function Events() {
         >
           <SectionHeading>Events</SectionHeading>
         </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, amount: 0.2 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="mt-10"
+        >
+          <Carousel
+            items={EVENTS}
+            tone="dark"
+            renderItem={(event) => (
+              <div className="rounded-3xl border border-hairline bg-graphite p-6 sm:p-8">
+                <div className="flex aspect-[4/3] w-full -rotate-2 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+                  <span className="font-mono text-xs uppercase tracking-widest text-white/30">
+                    Event Photo
+                  </span>
+                </div>
+                <h3 className="mt-6 font-display text-2xl font-semibold text-white">
+                  {event.title}
+                </h3>
+                <p className="mt-3 text-sm text-white/70">{event.description}</p>
+              </div>
+            )}
+          />
+        </motion.div>
       </div>
-
-      <motion.div
-        initial={{ opacity: 0, y: 24 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, amount: 0.2 }}
-        transition={{ duration: 0.6, delay: 0.1 }}
-        className="scrollbar-hide mt-10 flex snap-x snap-mandatory gap-6 overflow-x-auto px-6 pb-4 sm:justify-center"
-      >
-        {EVENTS.map((event) => (
-          <div
-            key={event.title}
-            className="w-[85%] shrink-0 snap-center rounded-3xl border border-hairline bg-graphite p-6 sm:w-[380px] sm:p-8"
-          >
-            <div className="flex aspect-[4/3] w-full -rotate-2 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
-              <span className="font-mono text-xs uppercase tracking-widest text-white/30">
-                Event Photo
-              </span>
-            </div>
-            <h3 className="mt-6 font-display text-2xl font-semibold text-white">
-              {event.title}
-            </h3>
-            <p className="mt-3 text-sm text-white/70">{event.description}</p>
-          </div>
-        ))}
-      </motion.div>
-
-      <p className="mt-4 text-center font-mono text-xs text-slate sm:hidden">
-        ← swipe to see more →
-      </p>
     </section>
   );
 }
