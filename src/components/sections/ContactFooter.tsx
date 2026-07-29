@@ -19,7 +19,7 @@ export default function ContactFooter() {
   return (
     <footer id="contact" className="relative overflow-hidden bg-void py-24 text-void-text">
       {/* Ambient glow, purely decorative */}
-      <div className="animate-aurora pointer-events-none absolute left-1/2 top-1/2 h-[50vh] w-[70vw] rounded-full bg-white/[0.06] blur-[100px]" />
+      <div className="animate-aurora pointer-events-none absolute left-1/2 top-1/2 h-[50vh] w-[70vw] rounded-full bg-accent/20 blur-[100px]" />
 
       {/* Giant faint background wordmark */}
       <div
@@ -61,7 +61,7 @@ export default function ContactFooter() {
         >
           <a
             href="mailto:c2c@college.edu"
-            className="rounded-full bg-void-text px-6 py-3 text-sm font-medium text-void transition hover:bg-white/80"
+            className="rounded-full bg-accent px-6 py-3 text-sm font-medium text-white transition hover:bg-accent-dark"
           >
             c2c@college.edu
           </a>

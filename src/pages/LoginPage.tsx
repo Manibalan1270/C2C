@@ -27,7 +27,7 @@ export default function LoginPage() {
             <input
               type="email"
               placeholder="you@college.edu"
-              className="w-full rounded-lg border border-hairline bg-transparent px-3 py-2 text-graphite placeholder:text-hairline-strong focus:border-graphite focus:outline-none"
+              className="w-full rounded-lg border border-hairline bg-transparent px-3 py-2 text-graphite placeholder:text-hairline-strong focus:border-accent focus:outline-none"
             />
           </div>
 
@@ -38,13 +38,13 @@ export default function LoginPage() {
             <input
               type="password"
               placeholder="••••••••"
-              className="w-full rounded-lg border border-hairline bg-transparent px-3 py-2 text-graphite placeholder:text-hairline-strong focus:border-graphite focus:outline-none"
+              className="w-full rounded-lg border border-hairline bg-transparent px-3 py-2 text-graphite placeholder:text-hairline-strong focus:border-accent focus:outline-none"
             />
           </div>
 
           <button
             type="submit"
-            className="w-full rounded-full bg-graphite py-2.5 text-sm font-medium text-canvas transition hover:bg-slate"
+            className="w-full rounded-full bg-accent py-2.5 text-sm font-medium text-white transition hover:bg-accent-dark"
           >
             Log In
           </button>

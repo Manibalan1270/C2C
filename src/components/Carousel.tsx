@@ -78,9 +78,7 @@ export default function Carousel<T>({ items, renderItem, tone = "light" }: Carou
             }}
             className={`h-1.5 rounded-full transition-all ${
               i === index
-                ? tone === "dark"
-                  ? "w-6 bg-white"
-                  : "w-6 bg-graphite"
+                ? "w-6 bg-accent"
                 : tone === "dark"
                   ? "w-1.5 bg-white/25"
                   : "w-1.5 bg-hairline-strong"

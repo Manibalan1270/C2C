@@ -14,6 +14,12 @@
   --color-hairline: #e6e6e1;
   --color-hairline-strong: #c9c9c3;
 
+  /* Accent — indigo/periwinkle, used sparingly for primary actions and
+     highlights against the otherwise black/white/gray palette. */
+  --color-accent: #5d5fef;
+  --color-accent-dark: #4a4cd6;
+  --color-accent-soft: #eceafd;
+
   --font-display: "Space Grotesk", "Inter", sans-serif;
   --font-serif: "Playfair Display", serif;
   --font-body: "Inter", sans-serif;

@@ -59,7 +59,7 @@ export default function Nav() {
 
         <button
           onClick={() => navigate("/login")}
-          className="rounded-full bg-graphite px-4 py-1.5 text-sm font-medium text-canvas transition hover:bg-slate"
+          className="rounded-full bg-accent px-4 py-1.5 text-sm font-medium text-white transition hover:bg-accent-dark"
         >
           Compete
         </button>
