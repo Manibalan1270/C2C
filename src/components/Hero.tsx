@@ -38,9 +38,18 @@ export default function Hero() {
       style={{ height: `${HERO_VH_MULTIPLIER * 100}vh` }}
     >
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden px-6">
-        <div className="absolute inset-0 text-void-text">
+        {/* Landing page uses a single layer confined to the right half of
+            the screen (Login keeps the full-width, two-layer version). The
+            mask feathers the left edge so the bundle emerges from mid-screen
+            instead of being cut off by a hard vertical line. */}
+        <div
+          className="absolute inset-y-0 left-1/2 right-0 text-void-text"
+          style={{
+            maskImage: "linear-gradient(to right, transparent, black 22%)",
+            WebkitMaskImage: "linear-gradient(to right, transparent, black 22%)",
+          }}
+        >
           <FloatingPaths position={1} />
-          <FloatingPaths position={-1} />
         </div>
 
         <motion.img
