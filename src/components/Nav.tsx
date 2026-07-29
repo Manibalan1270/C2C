@@ -1,18 +1,41 @@
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import clubLogo from "../assets/club-logo.jpeg";
+import { HERO_VH_MULTIPLIER } from "../lib/layout";
 
 const NAV_LINKS = [
-  { label: "About", href: "#about" },
-  { label: "Blog", href: "#blog" },
+  { label: "About Us", href: "#about" },
+  { label: "Events", href: "#events" },
+  { label: "Blogs", href: "#blog" },
   { label: "Board Members", href: "#board" },
 ];
 
 export default function Nav() {
-  const navigate = useNavigate();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    function handleScroll() {
+      const revealAfterPx = window.innerHeight * HERO_VH_MULTIPLIER;
+      setVisible(window.scrollY >= revealAfterPx);
+    }
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-hairline bg-canvas/95 backdrop-blur">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
+    <nav
+      className="fixed top-4 left-1/2 z-50 -translate-x-1/2 transition-all duration-300 ease-out"
+      style={{
+        opacity: visible ? 1 : 0,
+        transform: `translate(-50%, ${visible ? "0" : "-16px"})`,
+        pointerEvents: visible ? "auto" : "none",
+      }}
+    >
+      <div className="flex items-center gap-8 rounded-full border border-hairline bg-canvas/90 px-4 py-2 shadow-sm backdrop-blur">
         <img
           src={clubLogo}
           alt="C2C logo"
@@ -31,14 +54,7 @@ export default function Nav() {
             </li>
           ))}
         </ul>
-
-        <button
-          onClick={() => navigate("/login")}
-          className="rounded-full bg-graphite px-4 py-1.5 text-sm font-medium text-canvas transition hover:bg-slate"
-        >
-          Compete
-        </button>
       </div>
-    </header>
+    </nav>
   );
 }
