@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { motion, useScroll, useTransform, easeInOut, cubicBezier } from "framer-motion";
 import clubLogo from "../assets/club-logo-transparent.png";
 import { HERO_VH_MULTIPLIER } from "../lib/layout";
+import { FloatingPaths } from "./ui/background-paths";
 
 // A "back out" curve — slight overshoot then settle — for the text's pop-in.
 const POP_EASE = cubicBezier(0.34, 1.56, 0.64, 1);
@@ -37,6 +38,11 @@ export default function Hero() {
       style={{ height: `${HERO_VH_MULTIPLIER * 100}vh` }}
     >
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden px-6">
+        <div className="absolute inset-0 text-void-text">
+          <FloatingPaths position={1} />
+          <FloatingPaths position={-1} />
+        </div>
+
         <motion.img
           src={clubLogo}
           alt="C2C Programming Club"

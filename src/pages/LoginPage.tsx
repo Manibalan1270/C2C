@@ -4,8 +4,8 @@ import clubLogo from "../assets/club-logo-transparent.png";
 
 export default function LoginPage() {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-canvas px-6 text-graphite">
-      <div className="absolute inset-0">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-canvas px-6">
+      <div className="absolute inset-0 text-graphite">
         <FloatingPaths position={1} />
         <FloatingPaths position={-1} />
       </div>
