@@ -29,3 +29,32 @@ body {
   color: var(--color-graphite);
   font-family: var(--font-body);
 }
+
+/* Footer marquee strip — pure CSS translateX loop, no JS, so it's cheap
+   regardless of how long it runs. */
+@keyframes marquee-scroll {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.animate-marquee {
+  animation: marquee-scroll 28s linear infinite;
+}
+
+/* Footer aurora glow — slow ambient pulse, opacity/transform only. */
+@keyframes aurora-breathe {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1.15);
+    opacity: 0.85;
+  }
+}
+.animate-aurora {
+  animation: aurora-breathe 7s ease-in-out infinite alternate;
+}
