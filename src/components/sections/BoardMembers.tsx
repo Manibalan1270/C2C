@@ -37,7 +37,7 @@ export default function BoardMembers() {
               key={member.role}
               className="flex w-[180px] shrink-0 flex-col items-center text-center"
             >
-              <div className="flex h-28 w-28 items-center justify-center rounded-full border border-hairline bg-canvas">
+              <div className="flex h-28 w-28 items-center justify-center rounded-full border border-hairline bg-surface">
                 <span className="font-display text-2xl text-slate">?</span>
               </div>
               <h3 className="mt-4 font-serif text-lg text-graphite">{member.name}</h3>

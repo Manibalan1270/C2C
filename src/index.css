@@ -7,12 +7,18 @@
   --color-void-text: #fafaf9;
   --color-void-muted: #b8b8b3;
 
-  /* Site-wide light theme — everything below the hero. */
-  --color-canvas: #f2f0ee;
-  --color-graphite: #111110;
-  --color-slate: #6f6f6a;
-  --color-hairline: #e6e6e1;
-  --color-hairline-strong: #c9c9c3;
+  /* Site-wide light theme — everything below the hero.
+     Deliberately a soft warm greige rather than near-white: large areas
+     of high-luminance white are what caused eye strain. Cards sit
+     *lighter* than the page so they still lift off it without needing
+     brightness anywhere. */
+  --color-canvas: #e8e4dd; /* page background */
+  --color-surface: #f1eee8; /* raised cards, nav pill, form panels */
+  --color-surface-muted: #dcd7ce; /* recessed blocks, e.g. event cards */
+  --color-graphite: #1c1c1a; /* primary text — eased off pure black */
+  --color-slate: #6b6b64; /* secondary text */
+  --color-hairline: #d5d0c7; /* borders/dividers */
+  --color-hairline-strong: #bdb7ac;
 
   /* Accent — indigo/periwinkle, used sparingly for primary actions and
      highlights against the otherwise black/white/gray palette. */

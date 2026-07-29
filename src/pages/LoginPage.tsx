@@ -25,7 +25,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form className="space-y-4 rounded-2xl border border-hairline bg-canvas/90 p-6 shadow-lg backdrop-blur-md">
+        <form className="space-y-4 rounded-2xl border border-hairline bg-surface/90 p-6 shadow-lg backdrop-blur-md">
           <div>
             <label className="mb-1 block font-mono text-xs uppercase tracking-wider text-slate">
               College Email

@@ -44,7 +44,7 @@ export default function BlogPreview() {
             items={MOCK_POSTS}
             tone="light"
             renderItem={(post) => (
-              <article className="rounded-2xl border border-hairline bg-canvas p-6 sm:p-8">
+              <article className="rounded-2xl border border-hairline bg-surface p-6 sm:p-8">
                 <span className="font-mono text-xs uppercase tracking-wider text-slate">
                   {post.category}
                 </span>

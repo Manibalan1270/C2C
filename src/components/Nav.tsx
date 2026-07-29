@@ -38,7 +38,7 @@ export default function Nav() {
         pointerEvents: visible ? "auto" : "none",
       }}
     >
-      <div className="flex items-center gap-8 rounded-full border border-hairline bg-canvas/90 px-4 py-2 shadow-sm backdrop-blur">
+      <div className="flex items-center gap-8 rounded-full border border-hairline bg-surface/90 px-4 py-2 shadow-sm backdrop-blur">
         <motion.img
           src={clubLogo}
           alt="C2C logo"

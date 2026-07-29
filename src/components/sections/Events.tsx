@@ -44,9 +44,9 @@ export default function Events() {
             items={EVENTS}
             tone="light"
             renderItem={(event) => (
-              <div className="rounded-2xl bg-stone-200/80 p-6 sm:p-8">
-                <div className="flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-stone-300/60">
-                  <span className="font-mono text-xs uppercase tracking-widest text-stone-500">
+              <div className="rounded-2xl bg-surface-muted p-6 sm:p-8">
+                <div className="flex aspect-[4/3] w-full items-center justify-center rounded-xl bg-hairline-strong/50">
+                  <span className="font-mono text-xs uppercase tracking-widest text-slate">
                     Event Photo
                   </span>
                 </div>
