@@ -31,15 +31,6 @@ export default function Hero() {
   const textScale = useTransform(scrollYProgress, REVEAL_RANGE, [0.92, 1], { ease: [POP_EASE] });
   const textY = useTransform(scrollYProgress, REVEAL_RANGE, [16, 0], { ease: [POP_EASE] });
 
-  // Background lines drift horizontally with scroll position — right as you
-  // scroll down, back left as you scroll up (it reverses naturally because
-  // it's tied to position, not velocity). Two layers at different rates for
-  // a little depth. This is one `x` transform per layer, not per path: the
-  // earlier per-path pathLength/pathOffset animation is what caused the
-  // page-wide flicker, so the SVG itself stays completely static.
-  const pathsXFront = useTransform(scrollYProgress, [0, 1], [0, 280]);
-  const pathsXBack = useTransform(scrollYProgress, [0, 1], [0, 150]);
-
   return (
     <div
       ref={containerRef}
@@ -47,21 +38,9 @@ export default function Hero() {
       style={{ height: `${HERO_VH_MULTIPLIER * 100}vh` }}
     >
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden px-6">
-        {/* Oversized wrappers (wider than the viewport) so the horizontal
-            drift never exposes an empty edge. */}
-        <div className="absolute inset-0 overflow-hidden text-void-text">
-          <motion.div
-            style={{ x: pathsXBack }}
-            className="absolute inset-y-0 left-[-25%] right-[-25%]"
-          >
-            <FloatingPaths position={-1} />
-          </motion.div>
-          <motion.div
-            style={{ x: pathsXFront }}
-            className="absolute inset-y-0 left-[-25%] right-[-25%]"
-          >
-            <FloatingPaths position={1} />
-          </motion.div>
+        <div className="absolute inset-0 text-void-text">
+          <FloatingPaths position={1} />
+          <FloatingPaths position={-1} />
         </div>
 
         <motion.img

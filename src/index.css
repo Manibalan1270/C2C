@@ -64,3 +64,21 @@ body {
 .animate-aurora {
   animation: aurora-breathe 7s ease-in-out infinite alternate;
 }
+
+/* Background line-art flow — the layer holds two identical tiles side by
+   side and slides by exactly one tile, so it loops seamlessly. One
+   transform per layer, GPU-composited; the SVG paths never change. */
+@keyframes paths-flow {
+  from {
+    transform: translateX(-50%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+.animate-paths-flow {
+  animation: paths-flow 34s linear infinite;
+}
+.animate-paths-flow-slow {
+  animation: paths-flow 55s linear infinite;
+}
