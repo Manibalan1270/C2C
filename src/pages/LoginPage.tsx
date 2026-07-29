@@ -1,10 +1,16 @@
 import { Link } from "react-router-dom";
+import { FloatingPaths } from "../components/ui/background-paths";
 import clubLogo from "../assets/club-logo-transparent.png";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-canvas px-6">
-      <div className="w-full max-w-sm">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-canvas px-6 text-graphite">
+      <div className="absolute inset-0">
+        <FloatingPaths position={1} />
+        <FloatingPaths position={-1} />
+      </div>
+
+      <div className="relative z-10 w-full max-w-sm">
         <div className="mb-8 flex flex-col items-center text-center">
           <img
             src={clubLogo}
@@ -19,7 +25,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form className="space-y-4 rounded-2xl border border-hairline bg-canvas p-6">
+        <form className="space-y-4 rounded-2xl border border-hairline bg-canvas/90 p-6 shadow-lg backdrop-blur-md">
           <div>
             <label className="mb-1 block font-mono text-xs uppercase tracking-wider text-slate">
               College Email
