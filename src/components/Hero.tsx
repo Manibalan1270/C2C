@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion, useScroll, useTransform, easeInOut } from "framer-motion";
 import clubLogo from "../assets/club-logo-transparent.png";
 import { HERO_VH_MULTIPLIER } from "../lib/layout";
 
@@ -18,13 +18,13 @@ export default function Hero() {
     offset: ["start start", "end start"],
   });
 
-  const logoY = useTransform(scrollYProgress, [0, 0.4], [0, -200]);
-  const logoScale = useTransform(scrollYProgress, [0, 0.4], [1, 0.4]);
-  // Narrow window (not 0.25→0.6) so the text snaps in quickly instead of
-  // lingering half-transparent — a white element at partial opacity on a
-  // black background reads as dim gray, which is what looked "off".
-  const textOpacity = useTransform(scrollYProgress, [0.38, 0.5], [0, 1]);
-  const textY = useTransform(scrollYProgress, [0.38, 0.5], [20, 0]);
+  const logoY = useTransform(scrollYProgress, [0, 0.42], [0, -200], { ease: [easeInOut] });
+  const logoScale = useTransform(scrollYProgress, [0, 0.42], [1, 0.4], { ease: [easeInOut] });
+  // Wide enough to feel smooth, narrow enough that it doesn't linger
+  // half-transparent (a white element at partial opacity on black reads
+  // as dim gray) — plus an eased curve instead of a linear ramp.
+  const textOpacity = useTransform(scrollYProgress, [0.34, 0.54], [0, 1], { ease: [easeInOut] });
+  const textY = useTransform(scrollYProgress, [0.34, 0.54], [24, 0], { ease: [easeInOut] });
 
   return (
     <div
