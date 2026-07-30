@@ -2,10 +2,15 @@ import { Link } from "react-router-dom";
 import { FloatingPaths } from "../components/ui/background-paths";
 import clubLogo from "../assets/club-logo-transparent.png";
 
+/**
+ * Uses the `login-*` colour tokens rather than the shared canvas/surface
+ * ones, so this screen keeps its warm palette and stays visually put when
+ * the content sections' theme is retuned.
+ */
 export default function LoginPage() {
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-canvas px-6">
-      <div className="absolute inset-0 text-graphite">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-login-bg px-6">
+      <div className="absolute inset-0 text-login-text">
         <FloatingPaths position={1} />
         <FloatingPaths position={-1} />
       </div>
@@ -15,36 +20,36 @@ export default function LoginPage() {
           <img
             src={clubLogo}
             alt="C2C logo"
-            className="h-16 w-16 rounded-full border border-hairline-strong object-contain p-1 invert"
+            className="h-16 w-16 rounded-full border border-login-faint object-contain p-1 invert"
           />
-          <h1 className="mt-4 font-display text-2xl font-semibold text-graphite">
+          <h1 className="mt-4 font-display text-2xl font-semibold text-login-text">
             Welcome back
           </h1>
-          <p className="mt-1 text-sm text-slate">
+          <p className="mt-1 text-sm text-login-muted">
             Sign in with your college email to compete.
           </p>
         </div>
 
-        <form className="space-y-4 rounded-2xl border border-hairline bg-surface/90 p-6 shadow-lg backdrop-blur-md">
+        <form className="space-y-4 rounded-2xl border border-login-line bg-login-surface/90 p-6 shadow-lg backdrop-blur-md">
           <div>
-            <label className="mb-1 block font-mono text-xs uppercase tracking-wider text-slate">
+            <label className="mb-1 block font-mono text-xs uppercase tracking-wider text-login-muted">
               College Email
             </label>
             <input
               type="email"
               placeholder="you@college.edu"
-              className="w-full rounded-lg border border-hairline bg-transparent px-3 py-2 text-graphite placeholder:text-hairline-strong focus:border-accent focus:outline-none"
+              className="w-full rounded-lg border border-login-line bg-transparent px-3 py-2 text-login-text placeholder:text-login-faint focus:border-accent focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="mb-1 block font-mono text-xs uppercase tracking-wider text-slate">
+            <label className="mb-1 block font-mono text-xs uppercase tracking-wider text-login-muted">
               Password
             </label>
             <input
               type="password"
               placeholder="••••••••"
-              className="w-full rounded-lg border border-hairline bg-transparent px-3 py-2 text-graphite placeholder:text-hairline-strong focus:border-accent focus:outline-none"
+              className="w-full rounded-lg border border-login-line bg-transparent px-3 py-2 text-login-text placeholder:text-login-faint focus:border-accent focus:outline-none"
             />
           </div>
 
@@ -56,8 +61,8 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-slate">
-          <Link to="/" className="hover:text-graphite">
+        <p className="mt-6 text-center text-sm text-login-muted">
+          <Link to="/" className="hover:text-login-text">
             ← Back to home
           </Link>
         </p>

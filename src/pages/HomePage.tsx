@@ -6,7 +6,7 @@ import BlogPreview from "../components/sections/BlogPreview";
 import BoardMembers from "../components/sections/BoardMembers";
 import ContactFooter from "../components/sections/ContactFooter";
 
-export default function LandingPage() {
+export default function HomePage() {
   return (
     <div className="min-h-screen bg-canvas">
       <Nav />

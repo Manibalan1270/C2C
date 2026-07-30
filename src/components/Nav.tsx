@@ -31,14 +31,14 @@ export default function Nav() {
 
   return (
     <nav
-      className="fixed top-4 left-1/2 z-50 -translate-x-1/2 transition-all duration-300 ease-out"
+      className="fixed inset-x-0 top-4 z-50 flex justify-center transition-all duration-300 ease-out"
       style={{
         opacity: visible ? 1 : 0,
-        transform: `translate(-50%, ${visible ? "0" : "-16px"})`,
+        transform: `translateY(${visible ? "0" : "-16px"})`,
         pointerEvents: visible ? "auto" : "none",
       }}
     >
-      <div className="flex items-center gap-8 rounded-full border border-hairline bg-surface/90 px-4 py-2 shadow-sm backdrop-blur">
+      <div className="grid grid-cols-[auto_1fr_auto] items-center gap-8 rounded-full border border-hairline bg-surface/90 px-4 py-2 shadow-sm backdrop-blur">
         <motion.img
           src={clubLogo}
           alt="C2C logo"
@@ -47,7 +47,7 @@ export default function Nav() {
           className="h-8 w-8 rounded-full border border-hairline-strong object-contain p-0.5 invert"
         />
 
-        <ul className="hidden items-center gap-6 sm:flex">
+        <ul className="hidden items-center justify-center gap-6 sm:flex">
           {NAV_LINKS.map((link) => (
             <li key={link.label}>
               <motion.a
