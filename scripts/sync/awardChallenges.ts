@@ -5,11 +5,18 @@
  * This is separate from awardSolves.ts and both run. They answer different
  * questions:
  *   - awardSolves: "your solve count went up" -> baseline XP per difficulty
- *   - here:        "you solved THIS problem"  -> the challenge's bonus XP
+ *   - here:        "you solved THIS problem"  -> the challenge's own XP
  *
- * A member who solves the week's hard challenge therefore gets the generic
- * hard-solve award *and* the challenge award. That's intended: the challenge
- * XP is the incentive to do the club's pick rather than any hard problem.
+ * ONE SOLVE, ONE AWARD. This runs first, and the difficulties it credits are
+ * passed to awardProgress so it skips the generic award for the same solve.
+ * Previously both fired: solving the week's medium challenge wrote two rows,
+ * paid twice, and made the Dashboard report two problems as three — every
+ * counter in the UI counts award rows, so a duplicate row is a duplicate
+ * problem as far as they can tell.
+ *
+ * The challenge still pays more than a generic solve of the same difficulty
+ * would, which is the actual incentive to do the club's pick. It just isn't
+ * paid *on top of* it any more.
  *
  * Idempotency, as everywhere in the engine, comes from a deterministic doc id
  * — `{uid}__challenge__{challengeId}`. A challenge can only ever be awarded
@@ -20,6 +27,7 @@ import { Timestamp, type Firestore } from "firebase-admin/firestore";
 import {
   COLLECTIONS,
   type PointsLogDoc,
+  type ProblemDifficulty,
   type WeeklyChallengeDoc,
 } from "../../src/types/schema";
 import { slugFromProblemUrl } from "../../src/lib/problemSlug";
@@ -32,6 +40,14 @@ export interface ChallengeAwardResult {
   pointsAwarded: number;
   /** Titles awarded this run, for the log line. */
   titles: string[];
+  /**
+   * Count of solves credited here, per difficulty.
+   *
+   * Handed to awardProgress so it can suppress the generic award for the same
+   * solve — see the note on its `creditedAsChallenge` parameter. Without this
+   * one solve is paid and counted twice.
+   */
+  byDifficulty: Partial<Record<ProblemDifficulty, number>>;
 }
 
 const empty: ChallengeAwardResult = {
@@ -39,6 +55,7 @@ const empty: ChallengeAwardResult = {
   xpAwarded: 0,
   pointsAwarded: 0,
   titles: [],
+  byDifficulty: {},
 };
 
 export function challengeAwardId(uid: string, challengeId: string): string {
@@ -106,6 +123,7 @@ export async function awardMatchedChallenges(
   let xpAwarded = 0;
   let pointsAwarded = 0;
   const titles: string[] = [];
+  const byDifficulty: Partial<Record<ProblemDifficulty, number>> = {};
 
   for (const { challenge, solvedAt } of fresh) {
     const docId = challengeAwardId(uid, challenge.challengeId);
@@ -133,9 +151,12 @@ export async function awardMatchedChallenges(
     xpAwarded += body.xpAwarded;
     pointsAwarded += body.pointsAwarded;
     titles.push(challenge.title);
+    if (body.difficulty) {
+      byDifficulty[body.difficulty] = (byDifficulty[body.difficulty] ?? 0) + 1;
+    }
   }
 
   if (!dryRun) await batch.commit();
 
-  return { newAwards: fresh.length, xpAwarded, pointsAwarded, titles };
+  return { newAwards: fresh.length, xpAwarded, pointsAwarded, titles, byDifficulty };
 }

@@ -110,6 +110,21 @@ export async function awardProgress(
     hackerrank?: { previous: number; current: number };
   },
   dryRun: boolean,
+  /**
+   * Solves already credited as weekly challenges in this run, per difficulty.
+   *
+   * One solve must produce exactly one award. When a member solves the week's
+   * medium challenge, the count-based delta and the challenge matcher both see
+   * the same event — without this, it is written twice, paid twice, and
+   * counted as two problems everywhere the UI counts award rows. The Dashboard
+   * reported three problems solved for two actual solves because of it.
+   *
+   * Suppressing here rather than at read time is deliberate: a deduplicating
+   * counter would have to guess which rows pair up, and count-based awards
+   * carry no problem slug to pair them by. Not writing the duplicate in the
+   * first place is the only version that is right by construction.
+   */
+  creditedAsChallenge: Partial<Record<ProblemDifficulty, number>> = {},
 ): Promise<AwardResult> {
   const planned: PlannedAward[] = [
     ...(plan.leetcode ? planLeetCode(uid, plan.leetcode.previous, plan.leetcode.current) : []),
@@ -118,10 +133,24 @@ export async function awardProgress(
       : []),
   ];
 
-  if (planned.length === 0) return emptyResult;
+  // Drop one generic award per challenge credited at the same difficulty.
+  // The skipped index is simply never issued — ids stay deterministic and the
+  // stored bookmark still advances to the true total, so the gap can't cause
+  // a re-award on a later run.
+  const remaining = { ...creditedAsChallenge };
+  const deduped = planned.filter((award) => {
+    const d = award.difficulty;
+    if (!d) return true;
+    const left = remaining[d] ?? 0;
+    if (left <= 0) return true;
+    remaining[d] = left - 1;
+    return false;
+  });
 
-  const capped = planned.length > MAX_AWARDS_PER_RUN;
-  const toWrite = capped ? planned.slice(0, MAX_AWARDS_PER_RUN) : planned;
+  if (deduped.length === 0) return emptyResult;
+
+  const capped = deduped.length > MAX_AWARDS_PER_RUN;
+  const toWrite = capped ? deduped.slice(0, MAX_AWARDS_PER_RUN) : deduped;
 
   const now = Timestamp.now();
   const week = isoWeekKey(now.toDate());

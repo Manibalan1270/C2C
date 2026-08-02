@@ -134,15 +134,10 @@ async function syncMember(
     await politeDelay();
   }
 
-  const award = await awardProgress(adminDb, user.uid, plan, DRY_RUN);
-  await applyXpDelta(adminDb, user.uid, award.xpAwarded, DRY_RUN);
-  if (award.capped) {
-    notes.push("award count hit the per-run cap — the rest will follow next run");
-  }
-
-  // Challenge matching. Its XP is applied separately from the count-based
-  // award above but folded into the same running total, so level and badge
-  // thresholds see the combined figure rather than a stale one.
+  // Challenge matching runs FIRST, and the order matters. It reports which
+  // difficulties it credited, and awardProgress uses that to skip the generic
+  // award for the very same solve — otherwise one problem is paid twice and
+  // counted twice everywhere the UI counts award rows.
   const challengeAward = await awardMatchedChallenges(
     adminDb,
     user.uid,
@@ -153,6 +148,18 @@ async function syncMember(
   await applyXpDelta(adminDb, user.uid, challengeAward.xpAwarded, DRY_RUN);
   if (challengeAward.newAwards > 0) {
     notes.push(`completed: ${challengeAward.titles.join(", ")}`);
+  }
+
+  const award = await awardProgress(
+    adminDb,
+    user.uid,
+    plan,
+    DRY_RUN,
+    challengeAward.byDifficulty,
+  );
+  await applyXpDelta(adminDb, user.uid, award.xpAwarded, DRY_RUN);
+  if (award.capped) {
+    notes.push("award count hit the per-run cap — the rest will follow next run");
   }
   if (!historyPublic) {
     notes.push("submission history is private — challenges can't be auto-completed");
