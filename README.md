@@ -91,6 +91,50 @@ surfaces as an error on their own profile rather than failing silently.
 
 ---
 
+## Moving to a custom domain
+
+Everything keeps working, but four things are pinned to the current Firebase
+domain and will not follow you automatically. The first two are silent
+failures — nothing errors in any log, features just stop.
+
+**1. Firebase Auth authorised domains — do this FIRST.**
+Firebase console → Authentication → Settings → Authorised domains → add the
+new domain. Miss this and Google sign-in fails on the new domain with a popup
+error, i.e. nobody can log in at all. It is not related to DNS and is not
+automatic.
+
+**2. CORS on the sync endpoint.**
+Add the domain to `SYNC_ALLOWED_ORIGINS` in the Vercel project (comma-separated),
+then redeploy it:
+
+```bash
+npx vercel env add SYNC_ALLOWED_ORIGINS production   # https://yourdomain.com
+npx vercel --prod
+```
+
+Miss this and the "Refresh now" button silently does nothing: the browser
+blocks the response, the server logs look healthy. The endpoint logs a
+`blocked origin` warning specifically so this is findable.
+
+**3. Share/SEO metadata** in `index.html` — `canonical`, `og:url`, `og:image`,
+`twitter:image`. These are absolute URLs by necessity (unfurlers do not resolve
+relative paths), so they must be edited by hand. Wrong values mean links
+unfurl pointing at the old domain.
+
+**4. `public/robots.txt` and `public/sitemap.xml`** both reference the old host.
+
+Then rebuild and redeploy: `npm run build && npx firebase deploy --only hosting`.
+
+Point the domain at **Firebase Hosting** (console → Hosting → Add custom
+domain); it issues the TLS certificate for you. The Vercel URL stays as it is
+and never needs a domain of its own — it is only ever called by JavaScript.
+
+> Hosting the SPA on Vercel too would remove the cross-origin hop entirely and
+> with it items 1-2 above. It also means giving up Firebase Hosting's
+> zero-config TLS and rewrites. Not recommended purely to avoid one env var.
+
+---
+
 ## On-demand sync ("Refresh my stats")
 
 The cron runs every 15 minutes. That is GitHub's practical floor — scheduled

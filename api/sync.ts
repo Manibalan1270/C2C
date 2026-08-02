@@ -37,15 +37,33 @@ import { syncMember } from "../scripts/sync/syncMember";
 const COOLDOWN_MS = 30_000;
 
 /**
- * Origins allowed to call this. An open CORS policy would let any site on the
- * internet drive requests through this endpoint using a visitor's token.
- * Extend deliberately — localhost is here for development only.
+ * Origins allowed to call this.
+ *
+ * An open CORS policy would let any site on the internet drive requests
+ * through this endpoint using a visitor's token, so the list stays explicit.
+ *
+ * Driven by SYNC_ALLOWED_ORIGINS (comma-separated) so moving the site to a
+ * custom domain is an environment-variable change, not a code change. This
+ * matters more than it looks: when the club buys a domain, the browser starts
+ * sending a new `Origin` header, the endpoint doesn't recognise it, and the
+ * browser blocks the response. Nothing errors server-side and the Vercel logs
+ * look perfectly healthy — the button just stops working, which is the hardest
+ * class of bug to trace back to its cause.
+ *
+ * The fallback keeps the default Firebase Hosting domains and localhost
+ * working when the variable is unset.
  */
-const ALLOWED_ORIGINS = [
+const DEFAULT_ORIGINS = [
   "https://c2cwebsite-b11a3.web.app",
   "https://c2cwebsite-b11a3.firebaseapp.com",
   "http://localhost:5173",
 ];
+
+const ALLOWED_ORIGINS = (process.env.SYNC_ALLOWED_ORIGINS ?? "")
+  .split(",")
+  .map((o) => o.trim().replace(/\/$/, ""))
+  .filter(Boolean)
+  .concat(DEFAULT_ORIGINS);
 
 interface Req {
   method?: string;
@@ -59,9 +77,15 @@ interface Res {
 }
 
 function applyCors(req: Req, res: Res) {
-  const origin = String(req.headers.origin ?? "");
+  const origin = String(req.headers.origin ?? "").replace(/\/$/, "");
   if (ALLOWED_ORIGINS.includes(origin)) {
     res.setHeader("Access-Control-Allow-Origin", origin);
+  } else if (origin) {
+    // Logged, because the alternative is a silent failure that looks like a
+    // broken button. This line is the first thing to check after a domain move.
+    console.warn(
+      `[api/sync] blocked origin "${origin}" — add it to SYNC_ALLOWED_ORIGINS`,
+    );
   }
   res.setHeader("Vary", "Origin");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
