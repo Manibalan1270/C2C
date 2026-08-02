@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Only the public landing page is listed.
+
+  Blog posts are deliberately absent: they're client-rendered from Firestore,
+  so a crawler fetching /blog/<id> gets an empty shell with no content to
+  index, and listing them would advertise pages that look broken to a bot.
+  When the blog matters enough, generate this file at build time from the
+  published posts and add prerendering — until then, one honest entry beats
+  a list of URLs that index as blank.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://c2cwebsite-b11a3.web.app/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>

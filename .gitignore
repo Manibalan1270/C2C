@@ -11,6 +11,24 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.local
+
+# Firebase CLI deploy cache
+.firebase/
+
+# Firebase Admin SDK service-account keys — a committed key is a full
+# database compromise. Never remove these lines.
+#
+# The patterns cover the name Firebase's console actually generates when you
+# click "Generate new private key", which is *not* serviceAccount.json — it's
+# <project>-firebase-adminsdk-<hash>-<hash>.json. The original pattern here
+# would not have caught that, so a key dropped into the repo would have been
+# committed silently.
+serviceAccount*.json
+scripts/**/*.serviceaccount.json
+*firebase-adminsdk*.json
+*-adminsdk-*.json
 
 # Editor directories and files
 .vscode/*

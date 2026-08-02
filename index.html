@@ -2,9 +2,87 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/jpeg" href="/src/assets/club-logo.jpeg" />
+    <!--
+      Served from public/, not src/assets/.
+
+      This used to point at /src/assets/club-logo.jpeg, which only resolves
+      under the dev server — Vite hashes and relocates everything under src/ at
+      build time, so the deployed site requested a path that did not exist and
+      fell back to a blank favicon. Anything referenced by absolute URL from
+      this file (favicons, og:image, manifest icons) has to live in public/.
+    -->
+    <link rel="icon" type="image/jpeg" href="/club-logo.jpeg" />
+    <link rel="apple-touch-icon" href="/club-logo.jpeg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>C2C — Compete to Compute</title>
+    <title>C2C — Compete to Compute | SVCE Coding Club</title>
+
+    <!--
+      Search and share metadata.
+
+      Static rather than per-route: this is a client-rendered SPA, so crawlers
+      and link unfurlers (WhatsApp, LinkedIn, Slack) read this file before any
+      JavaScript runs and would see whatever is hard-coded here regardless.
+      Getting per-post titles into a shared link needs prerendering or SSR —
+      worth doing if the blog becomes a real channel, but the club's front door
+      is the home page and this describes it honestly.
+
+      og:image is the club logo. Absolute URLs are mandatory: unfurlers do not
+      resolve relative paths.
+    -->
+    <meta
+      name="description"
+      content="Compete to Compute (C2C) is the coding club at Sri Venkateswara College of Engineering. Weekly challenges, contests, a live XP leaderboard, and a community learning DSA and competitive programming together."
+    />
+    <link rel="canonical" href="https://c2cwebsite-b11a3.web.app/" />
+    <meta name="theme-color" content="#1a1a1a" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Compete to Compute" />
+    <meta property="og:title" content="C2C — Compete to Compute | SVCE Coding Club" />
+    <meta
+      property="og:description"
+      content="Weekly challenges, contests, and a live XP leaderboard. The coding club at SVCE."
+    />
+    <meta property="og:url" content="https://c2cwebsite-b11a3.web.app/" />
+    <meta
+      property="og:image"
+      content="https://c2cwebsite-b11a3.web.app/club-logo.jpeg"
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="C2C — Compete to Compute | SVCE Coding Club" />
+    <meta
+      name="twitter:description"
+      content="Weekly challenges, contests, and a live XP leaderboard. The coding club at SVCE."
+    />
+    <meta
+      name="twitter:image"
+      content="https://c2cwebsite-b11a3.web.app/club-logo.jpeg"
+    />
+    <!--
+      Set the members-area theme before first paint. This has to be a blocking
+      inline script rather than something React does on mount: by the time the
+      bundle parses, the browser has already painted, and a member who chose
+      light would watch the page flash dark first.
+
+      Precedence is duplicated from resolveInitialTheme() in
+      src/lib/ThemeContext.tsx — change both together.
+    -->
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("c2c-theme");
+          document.documentElement.dataset.theme =
+            stored === "light" || stored === "dark"
+              ? stored
+              : window.matchMedia("(prefers-color-scheme: light)").matches
+                ? "light"
+                : "dark";
+        } catch (e) {
+          document.documentElement.dataset.theme = "dark";
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

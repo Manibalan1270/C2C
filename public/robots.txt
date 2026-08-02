@@ -1,0 +1,18 @@
+# Compete to Compute — SVCE coding club
+#
+# The members area and admin panel are behind Firebase Auth, so a crawler
+# can't read them regardless. They're listed anyway so search engines don't
+# waste crawl budget on routes that only ever return the app shell, and so
+# nobody's dashboard URL turns up in a search result.
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /profile
+Disallow: /challenges
+Disallow: /leaderboard
+Disallow: /welcome
+Disallow: /login
+
+Sitemap: https://c2cwebsite-b11a3.web.app/sitemap.xml

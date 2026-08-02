@@ -1,0 +1,55 @@
+name: Sync coding platforms
+
+# The XP/streak/leaderboard engine. Runs here rather than in a Cloud
+# Function because Cloud Functions require the Blaze billing plan and this
+# project is on Spark — the Admin SDK bypasses Firestore rules either way,
+# so the security property is identical.
+on:
+  schedule:
+    # Every 6 hours. Deliberately not more often: we're reading undocumented
+    # endpoints on LeetCode/HackerRank, and the data is a leaderboard, not a
+    # live scoreboard. Cron on GitHub's shared runners is best-effort and can
+    # be delayed under load — the engine is idempotent, so a late or skipped
+    # run costs nothing but freshness.
+    - cron: "0 */6 * * *"
+  # Lets a board member trigger a run by hand from the Actions tab, e.g.
+  # right after posting a new weekly challenge.
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Read and report without writing"
+        type: boolean
+        default: false
+
+# Two runs writing at once is safe (every award is idempotent) but wasteful
+# and makes the logs confusing, so serialise instead.
+concurrency:
+  group: platform-sync
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Run sync
+        env:
+          # Repo secret: paste the full service-account JSON as one line.
+          # Settings > Secrets and variables > Actions > New repository secret
+          FIREBASE_SERVICE_ACCOUNT_JSON: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            npm run sync -- --dry-run
+          else
+            npm run sync
+          fi

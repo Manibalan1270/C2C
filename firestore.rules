@@ -1,0 +1,281 @@
+rules_version = '2';
+
+// C2C security rules — v1 starter.
+//
+// Guiding rule: anything that affects standing (xp, level, role, streaks,
+// badges) is written server-side only, never by the client. The SRS calls
+// for Cloud Functions to own the XP/streak/leaderboard engine; in practice
+// (Spark plan, no billing) that engine is a scheduled GitHub Actions job
+// using the Admin SDK, which bypasses these rules the same way Functions
+// would. Same security property, different runtime. Client writes are
+// limited to the few fields a member legitimately owns.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isCollegeAccount() {
+      return isSignedIn()
+        && request.auth.token.email.matches('.*@svce\\.ac\\.in');
+    }
+
+    // A `get()` role check, not a custom claim — deliberately, because a
+    // member can never write their own `role` (see the users/{uid} create
+    // and update rules below), so reading it back out of their own doc is
+    // trustworthy. Costs one extra document read per admin write.
+    function roleOf(uid) {
+      return get(/databases/$(database)/documents/users/$(uid)).data.role;
+    }
+
+    function isAdmin() {
+      return isCollegeAccount() && roleOf(request.auth.uid) in ['admin', 'super_admin'];
+    }
+
+    function isSuperAdmin() {
+      return isCollegeAccount() && roleOf(request.auth.uid) == 'super_admin';
+    }
+
+    // Fields a member may change on their own profile. Everything else
+    // (xp, level, role, streaks, badgeIds, stats) is server-owned.
+    function onlyMemberEditableFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['leetcodeUsername', 'hackerrankUsername', 'name', 'updatedAt']);
+    }
+
+    function validPlatformHandle(v) {
+      return v == null || (v is string && v.size() > 0 && v.size() <= 40);
+    }
+
+    // What an admin may change on someone else's profile. Deliberately does
+    // NOT include stats/syncState/streaks — those are the sync engine's, and
+    // hand-editing them would just be overwritten on the next run.
+    function onlyAdminEditableUserFields() {
+      return request.resource.data.diff(resource.data).affectedKeys()
+        .hasOnly(['role', 'xp', 'level', 'badgeIds', 'leetcodeUsername',
+                  'hackerrankUsername', 'updatedAt']);
+    }
+
+    function validAdminUserWrite() {
+      let d = request.resource.data;
+      let changed = d.diff(resource.data).affectedKeys();
+      return d.role in ['guest', 'member', 'mentor', 'admin', 'super_admin']
+        && d.xp is int && d.xp >= 0 && d.xp <= 1000000
+        && d.level is int && d.level >= 1 && d.level <= 1000
+        && d.badgeIds is list && d.badgeIds.size() <= 100
+        // Minting another super_admin is reserved to a super_admin, so a
+        // single compromised admin account can't escalate itself past the
+        // people who appointed it.
+        && (!changed.hasAny(['role']) || d.role != 'super_admin' || isSuperAdmin());
+    }
+
+    function validAuditEntry() {
+      let d = request.resource.data;
+      return d.actorUid == request.auth.uid
+        && d.action is string && d.action.size() <= 40
+        && d.detail is string && d.detail.size() <= 500;
+    }
+
+    // Bounds here aren't paranoia about admins — they're a blast-radius cap
+    // on a compromised admin account, and they document the intended
+    // economy (nothing should ever be worth 10,000 XP).
+    function validChallenge() {
+      let d = request.resource.data;
+      return d.week is string
+        && d.week.matches('^[0-9]{4}-W[0-9]{2}$')
+        && d.tier in ['easy', 'medium', 'hard', 'surprise']
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 200
+        && (d.problemUrl == null || (d.problemUrl is string && d.problemUrl.size() <= 500))
+        && d.requiredCount is int && d.requiredCount >= 1 && d.requiredCount <= 50
+        && d.points is int && d.points >= 0 && d.points <= 500
+        && d.xp is int && d.xp >= 0 && d.xp <= 1000
+        && d.createdBy == request.auth.uid;
+    }
+
+    function validWeeklyGoal() {
+      let d = request.resource.data;
+      return d.target is int && d.target >= 1 && d.target <= 100
+        && d.label is string && d.label.size() > 0 && d.label.size() <= 200
+        && d.createdBy == request.auth.uid;
+    }
+
+    match /users/{uid} {
+      // Any signed-in college member can read profiles — the leaderboard
+      // and member directory need names/xp. Keep emails out of any
+      // client-facing list rather than relying on rules alone.
+      allow read: if isCollegeAccount();
+
+      // First login creates the doc, but the client must not be able to
+      // seed itself a role or a starting XP balance.
+      allow create: if isCollegeAccount()
+        && request.auth.uid == uid
+        && request.resource.data.role == 'member'
+        && request.resource.data.xp == 0
+        && request.resource.data.level == 1;
+
+      // Two distinct paths: a member editing their own handles, or an admin
+      // adjusting someone's standing from the admin area. Neither can touch
+      // what the other owns.
+      allow update: if (
+          isCollegeAccount()
+          && request.auth.uid == uid
+          && onlyMemberEditableFields()
+          && validPlatformHandle(request.resource.data.leetcodeUsername)
+          && validPlatformHandle(request.resource.data.hackerrankUsername)
+        ) || (
+          isAdmin()
+          && onlyAdminEditableUserFields()
+          && validAdminUserWrite()
+        );
+
+      allow delete: if false;
+    }
+
+    // Read-only to members; admins can create/update/delete this week's
+    // set from the admin UI, which is why the checks below exist — a
+    // member can't invent a challenge worth 10000 XP, and an admin can't
+    // accidentally either.
+    match /weeklyChallenges/{challengeId} {
+      allow read: if isCollegeAccount();
+      allow create: if isAdmin() && validChallenge();
+      allow update: if isAdmin() && validChallenge();
+      allow delete: if isAdmin();
+    }
+
+    match /weeklyGoals/{week} {
+      allow read: if isCollegeAccount();
+      allow write: if isAdmin() && validWeeklyGoal();
+    }
+
+    // Award history and leaderboard snapshots are produced by the sync
+    // engine (Admin SDK) only — never the client, admin or not.
+    match /pointsLog/{logId} {
+      allow read: if isCollegeAccount();
+      allow write: if false;
+    }
+
+    match /leaderboardSnapshots/{snapshotId} {
+      allow read: if isCollegeAccount();
+      allow write: if false;
+    }
+
+    // Badge definitions. Seeded via the Admin SDK (which bypasses these
+    // rules entirely), and editable from the admin area so the board can add
+    // a badge without a developer.
+    match /badges/{badgeId} {
+      allow read: if isCollegeAccount();
+      allow create, update: if isAdmin()
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 60
+        && request.resource.data.description is string
+        && request.resource.data.description.size() <= 300
+        && request.resource.data.criteriaValue is int
+        && request.resource.data.criteriaValue >= 0;
+      allow delete: if isAdmin();
+    }
+
+    match /announcements/{announcementId} {
+      allow read: if isCollegeAccount();
+      allow create, update: if isAdmin()
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 200
+        && request.resource.data.body is string
+        && request.resource.data.body.size() > 0
+        && request.resource.data.body.size() <= 5000
+        && request.resource.data.postedBy == request.auth.uid;
+      allow delete: if isAdmin();
+    }
+
+    // -----------------------------------------------------------------
+    // PUBLIC SITE CONTENT
+    //
+    // The only world-readable collections in this file. The marketing site
+    // is served to logged-out visitors, so `isCollegeAccount()` here would
+    // mean the public homepage could never display real content — which is
+    // exactly the bug these rules fix. Everything below is therefore
+    // `allow read: if true`, and nothing that isn't meant to be public may
+    // be written into these documents.
+    //
+    // Images are embedded as data URLs rather than Storage links (Spark
+    // plan, no billing). That makes an image a *field*, so its size is a
+    // rules concern: without a cap, one admin could push a 900KB hero photo
+    // into a document that every anonymous visitor then downloads. The cap
+    // is enforced in the cropper, in the query layer, and here — the last
+    // of which is the only one an attacker can't skip.
+    // -----------------------------------------------------------------
+
+    function validInlineImage(v) {
+      // 700_000 matches MAX_INLINE_IMAGE_BYTES in src/types/schema.ts.
+      // `size()` on a string is its character count; base64 is 1 byte per
+      // character, so this is a direct byte comparison.
+      return v == null || (v is string && v.size() <= 700000
+        && v.matches('^data:image/(jpeg|png|webp);base64,.*'));
+    }
+
+    function validSiteEvent() {
+      let d = request.resource.data;
+      return d.title is string && d.title.size() > 0 && d.title.size() <= 200
+        && d.description is string && d.description.size() <= 2000
+        && d.dateLabel is string && d.dateLabel.size() <= 100
+        && (!('startDate' in d) || d.startDate == null
+            || (d.startDate is string && d.startDate.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$')))
+        && (d.location == null || (d.location is string && d.location.size() <= 200))
+        && validInlineImage(d.imageUrl)
+        && d.order is int && d.order >= 0 && d.order <= 9999
+        && d.published is bool;
+    }
+
+    function validBoardMember() {
+      let d = request.resource.data;
+      return d.name is string && d.name.size() > 0 && d.name.size() <= 120
+        && d.title is string && d.title.size() > 0 && d.title.size() <= 120
+        && (d.linkUrl == null || (d.linkUrl is string && d.linkUrl.size() <= 500))
+        && validInlineImage(d.imageUrl)
+        && d.order is int && d.order >= 0 && d.order <= 9999
+        && d.published is bool;
+    }
+
+    function validBlogPost() {
+      let d = request.resource.data;
+      return d.title is string && d.title.size() > 0 && d.title.size() <= 200
+        && d.category in ['news', 'journey']
+        && d.status in ['draft', 'published']
+        && d.body is string && d.body.size() > 0 && d.body.size() <= 20000;
+    }
+
+    match /siteEvents/{eventId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && validSiteEvent();
+      allow delete: if isAdmin();
+    }
+
+    match /boardMembers/{memberId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && validBoardMember();
+      allow delete: if isAdmin();
+    }
+
+    // Drafts are readable too. Splitting visibility by `status` would need a
+    // rule the public list query can't satisfy without an equality filter on
+    // it — the landing page already filters to published, and a draft blog
+    // post is not a secret. Don't put anything sensitive in a draft.
+    match /blogPosts/{postId} {
+      allow read: if true;
+      allow create, update: if isAdmin() && validBlogPost();
+      allow delete: if isAdmin();
+    }
+
+    // Append-only. Admins can write and read history; nobody can rewrite it,
+    // which is the only property that makes an audit log worth having.
+    match /adminAuditLog/{logId} {
+      allow read: if isAdmin();
+      allow create: if isAdmin() && validAuditEntry();
+      allow update, delete: if false;
+    }
+
+    // Anything not matched above is denied by default.
+  }
+}

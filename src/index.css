@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=Playfair+Display:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600&family=JetBrains+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 
 @theme {
@@ -6,6 +6,22 @@
   --color-void: #050505;
   --color-void-text: #fafaf9;
   --color-void-muted: #b8b8b3;
+
+  /*
+   * DECISION: the marketing site is light-only, on purpose.
+   *
+   * The members area gained a light/dark toggle; this palette deliberately did
+   * not follow. A landing page is a 30-second visit for someone deciding
+   * whether to join a club, and these greys — chosen against the black hero and
+   * the logo — are the brand at that moment. A dark variant would double the
+   * design surface, need every contrast pair re-derived, and change nothing
+   * about the decision a visitor is making.
+   *
+   * The theme attribute is still written on <html> for the members area, and
+   * these tokens simply don't respond to it. If that ever changes, the work is
+   * a full second palette here plus a re-run of the contrast checks, not a
+   * quick inversion.
+   */
 
   /* Content sections below the hero.
      A cool neutral grey rather than warm beige or near-white — lower
@@ -37,11 +53,188 @@
   --color-accent-dark: #4a4cd6;
   --color-accent-soft: #eceafd;
 
+  /* Members area — LeetCode-derived theme, used from the post-login splash
+     through every Dashboard/Profile/Challenges/Leaderboard/Admin screen.
+     Kept separate from the site's grey content palette above, same way
+     login-* is kept separate: this is a deliberately distinct zone.
+
+     The values here are the DARK theme and also the fallback when no
+     data-theme attribute is present. Light is selected — not flipped — in
+     the `:root[data-theme="light"]` block further down; several steps there
+     are different colours, not lighter versions of these, because contrast
+     against a white ground is a different problem. See that block.
+
+     Naming is by ROLE, not by appearance, because a name like "bright" only
+     survives one of the two themes:
+       accent        a fill you put things on top of
+       accent-hover  the hover/pressed step of that fill
+       accent-text   the accent used AS text or an icon (contrast-safe)
+       on-accent     the foreground that sits ON an accent fill
+     `on-accent` in particular must not be aliased to the page background —
+     that only reads correctly while the page is dark. */
+  --color-galaxy-void: #1a1a1a; /* page background */
+  --color-galaxy-deep: #202020; /* recessed rows inside a panel */
+  --color-galaxy-surface: #282828; /* cards, nav bar */
+  --color-galaxy-surface-hover: #303030;
+  --color-galaxy-line: #3e3e3e; /* borders/dividers */
+  --color-galaxy-text: #eff1f6; /* primary text — 13.05:1 on surface */
+  --color-galaxy-muted: #b3b3b3; /* secondary text — 7.03:1 */
+  --color-galaxy-dim: #808080; /* tertiary / de-emphasis — 3.73:1 */
+
+  --color-galaxy-nav: #1a1a1a; /* top bar — same tone as the page */
+
+  /* Orange is a MARK colour, not a button colour. In the reference it appears
+     on the logo, the star, the streak flame and the Premium chip, and nowhere
+     as a large fill — the primary button is plain white. Keeping orange for
+     marks and giving the CTA its own token is what stops the members area
+     looking like a different product that happens to share a hue. */
+  --color-galaxy-accent: #ffa116; /* LeetCode orange — marks, small fills */
+  --color-galaxy-accent-hover: #ffb84d; /* hover/pressed step */
+  --color-galaxy-accent-text: #ffa116; /* as text — 7.27:1 on surface */
+  --color-galaxy-on-accent: #1a1a1a; /* on an accent fill — 8.59:1 */
+
+  /* Primary call to action. Inverts across themes exactly as the reference
+     does: near-white on dark, near-black on light. */
+  --color-galaxy-cta: #eff1f6;
+  --color-galaxy-on-cta: #1a1a1a; /* 15.40:1 on the fill */
+
+  /* Secondary/neutral button — the grey pills beside the primary action. */
+  --color-galaxy-control: #3c3c3c;
+  --color-galaxy-control-hover: #4a4a4a;
+
   --font-display: "Space Grotesk", "Inter", sans-serif;
   --font-serif: "Playfair Display", serif;
   --font-body: "Inter", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
+  /* Members area only. Was a squared-off techno face when this zone was a
+     HUD; the LeetCode direction wants a plain, dense UI voice instead, so
+     this now rides the body face at a heavier weight rather than pulling a
+     second family over the wire. */
+  --font-tech: "Inter", "Space Grotesk", sans-serif;
 }
+
+/*
+ * Chart colours for the members area.
+ *
+ * Plain custom properties rather than `@theme` entries: charts consume these
+ * through `chartTokens.ts` as `var(...)` strings in SVG fill/stroke, so they
+ * never need to become Tailwind utilities — and keeping them out of `@theme`
+ * sidesteps the question of unused-utility tree-shaking entirely.
+ *
+ * Every value below was checked with the dataviz validator against the
+ * surface it actually sits on. Don't hand-tweak a step without re-running it.
+ *
+ * On the difficulty ramp specifically: it reads as a categorical palette but
+ * behaves as a STATUS palette — BarList and the challenge tiers always print
+ * the word "Easy"/"Medium"/"Hard" beside the mark, so colour reinforces a
+ * label rather than carrying identity alone. That is why the dark steps keep
+ * LeetCode's literal values even though they sit outside the validator's
+ * categorical lightness band: the band governs categorical palettes, and the
+ * checks that do govern here — CVD separation and contrast vs surface — pass.
+ *
+ * Note the lightness SPREAD across the three is deliberate and load-bearing.
+ * Flattening them to a common lightness (the obvious "make it tidy" move)
+ * collapses amber against red to ΔE 4.0 for deuteranopes. Light mode keeps
+ * the spread and shifts the whole set down instead.
+ */
+:root {
+  --chart-mark: #ffa116; /* primary mark — 7.27:1 on surface */
+  --chart-mark-muted: #5c5c5c; /* recessive context, deliberately low */
+  --chart-track: #3e3e3e; /* unfilled meter track */
+  --chart-grid: #3e3e3e;
+  --chart-surface: #282828; /* for 2px gaps and rings between marks */
+
+  /* Difficulty, easy -> hard. CVD ΔE 15.5 worst adjacent, all >= 3:1. */
+  --chart-ordinal-1: #00b8a3;
+  --chart-ordinal-2: #ffb800;
+  --chart-ordinal-3: #ff375f;
+
+  /* Direction. Unlike the previous theme this one HAS a real green/red pair,
+     so improvement and slippage no longer have to lean on the caret alone —
+     but the caret and the word stay, because colour is never the sole cue. */
+  --chart-good: #00b8a3;
+  --chart-bad: #ff375f;
+  --chart-neutral: #b3b3b3;
+
+  --chart-xp: #ffa116;
+
+  /* Ambient-effect dimmers, OFF in both themes.
+     The reference is a flat product surface — no starfield behind the content,
+     no light trailing the pointer — so both effects are dark now as well as
+     light. The components are still mounted and still wired to these values:
+     raise either above 0 and it comes straight back, no code change. Both
+     components early-return while their value is 0, so nothing runs per frame
+     to produce something invisible. */
+  --fx-galaxy-opacity: 0;
+  --fx-cursor-opacity: 0;
+}
+
+/*
+ * Light theme. Selected, not flipped.
+ *
+ * Cards sit LIGHTER than the page here (white on near-white grey) so panels
+ * lift by being raised, matching the dark theme's logic rather than inverting
+ * it. The accent fill stays LeetCode orange in both themes — it is legible on
+ * either ground — but every step that is used as TEXT has to be re-derived,
+ * because orange on white is ~2:1 and fails outright.
+ */
+:root[data-theme="light"] {
+  --color-galaxy-void: #f7f8fa; /* page background */
+  --color-galaxy-deep: #eff1f6; /* recessed rows inside a panel */
+  --color-galaxy-surface: #ffffff; /* cards, nav bar */
+  --color-galaxy-surface-hover: #f2f3f7;
+  --color-galaxy-line: #e5e7eb;
+  --color-galaxy-text: #262626; /* 15.13:1 on surface */
+  --color-galaxy-muted: #616161; /* 6.19:1 */
+  --color-galaxy-dim: #8a8a8a; /* 3.45:1 */
+
+  --color-galaxy-nav: #ffffff; /* top bar sits above the page, not on its tone */
+
+  --color-galaxy-accent: #ffa116; /* unchanged — it is a fill, not text */
+  --color-galaxy-accent-hover: #e8900c; /* darker step: on white, hover goes down */
+  --color-galaxy-accent-text: #a06200; /* 4.95:1 on surface, 4.66:1 on page */
+  --color-galaxy-on-accent: #1a1a1a; /* unchanged — 8.59:1 on the orange */
+
+  --color-galaxy-cta: #1a1a1a; /* inverted, per the reference */
+  --color-galaxy-on-cta: #ffffff; /* 17.40:1 on the fill */
+
+  --color-galaxy-control: #eff1f6;
+  --color-galaxy-control-hover: #e2e5ea;
+
+  --chart-mark: #a06200;
+  --chart-mark-muted: #c9ccd1;
+  --chart-track: #e5e7eb;
+  --chart-grid: #e5e7eb;
+  --chart-surface: #ffffff;
+
+  /* Same hues, same lightness spread, shifted down 0.16 OKLCH L so all three
+     clear 3:1 on white. Teal walked slightly toward green: at this lightness
+     LeetCode's exact hue runs out of sRGB chroma and trips the "reads gray"
+     floor. All checks pass. */
+  --chart-ordinal-1: #008368;
+  --chart-ordinal-2: #c08900;
+  --chart-ordinal-3: #b9003a;
+
+  --chart-good: #008368;
+  --chart-bad: #b9003a;
+  --chart-neutral: #616161;
+
+  --chart-xp: #a06200;
+
+  --fx-galaxy-opacity: 0;
+  --fx-cursor-opacity: 0;
+}
+
+/*
+ * `color-scheme` is deliberately NOT set alongside the tokens above.
+ *
+ * data-theme lives on <html> because that's the only element the pre-paint
+ * boot script can reach, but the theme itself only governs the members area —
+ * the marketing site and login screen keep their own light palettes. Declaring
+ * `color-scheme: dark` here would darken their scrollbars too. MembersLayout
+ * sets it on <html> while it's mounted and clears it on the way out, so the
+ * native UI follows the theme exactly where the theme applies.
+ */
 
 html {
   color-scheme: light;

@@ -1,6 +1,12 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
+import { FcGoogle } from "react-icons/fc";
 import { FloatingPaths } from "../components/ui/background-paths";
 import clubLogo from "../assets/club-logo-transparent.png";
+import { auth } from "../lib/firebase";
+
+const COLLEGE_EMAIL_DOMAIN = "svce.ac.in";
 
 /**
  * Uses the `login-*` colour tokens rather than the shared canvas/surface
@@ -8,6 +14,37 @@ import clubLogo from "../assets/club-logo-transparent.png";
  * the content sections' theme is retuned.
  */
 export default function LoginPage() {
+  const navigate = useNavigate();
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleGoogleSignIn() {
+    setError(null);
+    setLoading(true);
+    try {
+      const provider = new GoogleAuthProvider();
+      // Hints Google's account picker toward the college Workspace domain —
+      // not a security boundary on its own, so we re-check the email below.
+      provider.setCustomParameters({ hd: COLLEGE_EMAIL_DOMAIN });
+
+      const result = await signInWithPopup(auth, provider);
+      const email = result.user.email ?? "";
+      if (!email.toLowerCase().endsWith(`@${COLLEGE_EMAIL_DOMAIN}`)) {
+        await signOut(auth);
+        setError(`Please sign in with your college email (@${COLLEGE_EMAIL_DOMAIN}).`);
+        return;
+      }
+      navigate("/welcome");
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code;
+      if (code !== "auth/popup-closed-by-user" && code !== "auth/cancelled-popup-request") {
+        setError("Something went wrong signing in. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-login-bg px-6">
       <div className="absolute inset-0 text-login-text">
@@ -26,40 +63,31 @@ export default function LoginPage() {
             Welcome back
           </h1>
           <p className="mt-1 text-sm text-login-muted">
-            Sign in with your college email to compete.
+            Sign in with your college Google account to compete.
           </p>
         </div>
 
-        <form className="space-y-4 rounded-2xl border border-login-line bg-login-surface/90 p-6 shadow-lg backdrop-blur-md">
-          <div>
-            <label className="mb-1 block font-mono text-xs uppercase tracking-wider text-login-muted">
-              College Email
-            </label>
-            <input
-              type="email"
-              placeholder="you@college.edu"
-              className="w-full rounded-lg border border-login-line bg-transparent px-3 py-2 text-login-text placeholder:text-login-faint focus:border-accent focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="mb-1 block font-mono text-xs uppercase tracking-wider text-login-muted">
-              Password
-            </label>
-            <input
-              type="password"
-              placeholder="••••••••"
-              className="w-full rounded-lg border border-login-line bg-transparent px-3 py-2 text-login-text placeholder:text-login-faint focus:border-accent focus:outline-none"
-            />
-          </div>
-
+        <div className="space-y-4 rounded-2xl border border-login-line bg-login-surface/90 p-6 shadow-lg backdrop-blur-md">
           <button
-            type="submit"
-            className="w-full rounded-full bg-accent py-2.5 text-sm font-medium text-white transition hover:bg-accent-dark"
+            type="button"
+            onClick={handleGoogleSignIn}
+            disabled={loading}
+            className="flex w-full items-center justify-center gap-3 rounded-full border border-login-line bg-white py-2.5 text-sm font-medium text-gray-800 transition hover:bg-gray-50 disabled:opacity-60"
           >
-            Log In
+            <FcGoogle className="h-5 w-5" />
+            {loading ? "Signing in…" : "Continue with Google"}
           </button>
-        </form>
+
+          <p className="text-center font-mono text-xs uppercase tracking-wider text-login-muted">
+            Only @{COLLEGE_EMAIL_DOMAIN} accounts
+          </p>
+
+          {error && (
+            <p role="alert" className="text-center text-sm text-red-500">
+              {error}
+            </p>
+          )}
+        </div>
 
         <p className="mt-6 text-center text-sm text-login-muted">
           <Link to="/" className="hover:text-login-text">

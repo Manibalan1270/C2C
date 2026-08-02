@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import clubLogo from "../assets/club-logo-transparent.png";
 import { HERO_VH_MULTIPLIER } from "../lib/layout";
+import { useAuth } from "../lib/AuthContext";
 
 const NAV_LINKS = [
   { label: "About Us", href: "#about" },
@@ -13,6 +14,7 @@ const NAV_LINKS = [
 
 export default function Nav() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -63,8 +65,10 @@ export default function Nav() {
           ))}
         </ul>
 
+        {/* Always the same door into the members area — signed-in members
+            skip the login screen and go straight to the splash. */}
         <motion.button
-          onClick={() => navigate("/login")}
+          onClick={() => navigate(user ? "/welcome" : "/login")}
           whileHover={{ scale: 1.08 }}
           whileTap={{ scale: 0.96 }}
           transition={{ type: "spring", stiffness: 400, damping: 12 }}
