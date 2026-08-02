@@ -6,12 +6,34 @@ name: Sync coding platforms
 # so the security property is identical.
 on:
   schedule:
-    # Every 6 hours. Deliberately not more often: we're reading undocumented
-    # endpoints on LeetCode/HackerRank, and the data is a leaderboard, not a
-    # live scoreboard. Cron on GitHub's shared runners is best-effort and can
-    # be delayed under load — the engine is idempotent, so a late or skipped
-    # run costs nothing but freshness.
-    - cron: "0 */6 * * *"
+    # Every 15 minutes. Was 6 hours, which was too slow for the thing members
+    # actually want to know: "did the site notice I solved it?" Waiting hours
+    # for that answer makes the feature feel broken even when it works.
+    #
+    # 15 is a floor set by GitHub, not by us. Scheduled workflows on shared
+    # runners are best-effort and routinely drift 5-15 minutes under load, so
+    # anything tighter buys nothing real — a "*/5" cron does not produce runs
+    # five minutes apart. Expect 15-30 minutes in practice.
+    #
+    # The politeness budget still holds. Each member costs 2 LeetCode requests
+    # spaced by politeDelay, so a 50-member club is ~100 requests per run and
+    # ~7 per minute averaged out. If LeetCode ever starts returning errors in
+    # bulk, widen this interval first — it is the cheapest lever, and the
+    # engine is idempotent so a skipped run costs nothing but freshness.
+    #
+    # FIRESTORE QUOTA CEILING — this interval is not free above a club size.
+    # Measured against the 50,000 reads/day Spark limit, with idle members
+    # skipping the recompute (see `nothingChanged` in syncPlatforms.ts):
+    #
+    #     50 members  -> ~43% of quota      safe
+    #    100 members  -> ~81% of quota      safe, watch it
+    #    200 members  -> ~158% of quota     EXCEEDS - reads start failing
+    #
+    # Past ~100 members, widen this to "*/30" (halves it) or move to Blaze.
+    # The failure mode is ugly: reads fail for everyone, so the app looks
+    # broken rather than merely stale. Check the Firestore usage graph before
+    # a big recruitment push.
+    - cron: "*/15 * * * *"
   # Lets a board member trigger a run by hand from the Actions tab, e.g.
   # right after posting a new weekly challenge.
   workflow_dispatch:

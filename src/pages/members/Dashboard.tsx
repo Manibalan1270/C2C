@@ -13,6 +13,7 @@ import { useMemberStats } from "../../hooks/useMemberStats";
 import { useWeeklyChallenges } from "../../hooks/useWeeklyChallenges";
 import { levelForXp, xpIntoLevel, XP_PER_LEVEL } from "../../lib/gamification";
 import Panel from "../../components/members/Panel";
+import SyncStatus from "../../components/members/SyncStatus";
 import Meter from "../../components/members/charts/Meter";
 import ColumnChart from "../../components/members/charts/ColumnChart";
 import Sparkline from "../../components/members/charts/Sparkline";
@@ -61,6 +62,7 @@ export default function Dashboard() {
         <h1 className="mt-2 font-tech text-2xl font-semibold tracking-tight">
           Welcome back, {firstName}
         </h1>
+        <SyncStatus className="mt-2" />
       </header>
 
       {/* KPI row — four headline numbers, each with the context it needs. */}

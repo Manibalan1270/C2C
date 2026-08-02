@@ -33,6 +33,7 @@ import {
   type BadgeDoc,
   type PlatformSolvedCounts,
   type PlatformSyncState,
+  type LeaderboardSnapshotDoc,
   type UserDoc,
   type WeeklyChallengeDoc,
 } from "../src/types/schema";
@@ -75,6 +76,17 @@ async function syncMember(
   user: UserDoc,
   badges: BadgeDoc[],
   challengesBySlug: Map<string, WeeklyChallengeDoc>,
+  /**
+   * Recent leaderboard snapshots, fetched ONCE for the whole run.
+   *
+   * This used to be fetched inside this function, meaning 9 document reads per
+   * member per run for data that is identical for every one of them. At a
+   * 15-minute cron that is 96 runs a day: a 50-member club paid ~43,000 reads
+   * a day for the same nine documents, against a 50,000/day free quota. The
+   * cost of the mistake scaled with both club size and sync frequency, so it
+   * would have surfaced as an outage right when the club got popular.
+   */
+  snapshots: LeaderboardSnapshotDoc[],
 ): Promise<string> {
   const errors: string[] = [];
   const notes: string[] = [];
@@ -165,6 +177,45 @@ async function syncMember(
     notes.push("submission history is private — challenges can't be auto-completed");
   }
 
+  /**
+   * Skip the expensive recompute when nothing about this member changed.
+   *
+   * computeProgression and buildStatsCache each scan a member's recent
+   * pointsLog — roughly 25 document reads per member per run. Most members, on
+   * most runs, have solved nothing since the last one, so that is pure waste,
+   * and at a 15-minute cron it is the difference between a club of 15 and a
+   * club of 200 fitting inside Firestore's free tier.
+   *
+   * The daily condition is what keeps this honest rather than merely cheap.
+   * Streaks DECAY with the calendar, not with new data: someone who stops
+   * solving must see their streak fall even though nothing new was written.
+   * Recomputing at least once per day preserves that, while still skipping the
+   * other ~95 runs where the answer provably cannot have changed.
+   */
+  const cache = user.stats;
+  const today = new Date().toISOString().slice(0, 10);
+  const cacheDay = cache?.computedAt?.toDate?.().toISOString().slice(0, 10);
+  const nothingChanged =
+    award.newAwards === 0 &&
+    challengeAward.newAwards === 0 &&
+    cache != null &&
+    cache.week === isoWeekKey() &&
+    cacheDay === today;
+
+  if (nothingChanged) {
+    if (!DRY_RUN) {
+      await adminDb.collection(COLLECTIONS.users).doc(user.uid).update({
+        syncState: nextState,
+        lastSyncedAt: FieldValue.serverTimestamp(),
+        lastSyncError: errors.length > 0 ? errors.join(" · ") : null,
+        leetcodeHistoryPublic: user.leetcodeUsername ? historyPublic : null,
+      });
+    }
+    const idle = ["no change"];
+    if (errors.length > 0) idle.push(`ERRORS: ${errors.join(" · ")}`);
+    return idle.join(" · ");
+  }
+
   const newXp = (user.xp ?? 0) + award.xpAwarded + challengeAward.xpAwarded;
   const progression = await computeProgression(
     adminDb,
@@ -174,7 +225,6 @@ async function syncMember(
     leetcodeCounts,
   );
 
-  const snapshots = await fetchRecentSnapshots(adminDb, 9);
   const stats = await buildStatsCache(
     adminDb,
     user.uid,
@@ -232,11 +282,15 @@ async function main() {
     `C2C sync — week ${isoWeekKey()}${DRY_RUN ? " (DRY RUN, no writes)" : ""}`,
   );
 
-  const [badges, members, challengesBySlug] = await Promise.all([
+  const [badges, members, challengesBySlug, snapshots] = await Promise.all([
     loadBadges(),
     loadMembers(onlyUid),
     // Loaded once for the whole run — a handful of docs reused for every member.
     loadMatchableChallenges(adminDb),
+    // Hoisted out of the per-member loop — identical for everyone, so fetching
+    // it once per run instead of once per member removes an N+1 that scaled
+    // with both club size and cron frequency.
+    fetchRecentSnapshots(adminDb, 9),
   ]);
 
   const linked = members.filter(
@@ -250,7 +304,7 @@ async function main() {
   let failures = 0;
   for (const user of linked) {
     try {
-      console.log(`  ${user.name} (${user.uid}): ${await syncMember(user, badges, challengesBySlug)}`);
+      console.log(`  ${user.name} (${user.uid}): ${await syncMember(user, badges, challengesBySlug, snapshots)}`);
     } catch (err: unknown) {
       // One member's failure must not take the run down — record it on
       // their profile and keep going.

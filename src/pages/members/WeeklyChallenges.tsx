@@ -6,6 +6,7 @@ import {
 import type { ChallengeTier } from "../../types/schema";
 import { useWeeklyChallenges } from "../../hooks/useWeeklyChallenges";
 import Panel from "../../components/members/Panel";
+import SyncStatus from "../../components/members/SyncStatus";
 import { ORDINAL, MARK } from "../../components/members/charts/chartTokens";
 
 /**
@@ -46,6 +47,7 @@ export default function WeeklyChallenges() {
             "Check back Monday for this week's set."
           ) : null}
         </p>
+        <SyncStatus className="mt-2" />
       </header>
 
       <Panel title="This week's set" icon={PiLightningDuotone}>
