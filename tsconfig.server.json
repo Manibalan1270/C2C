@@ -1,0 +1,27 @@
+{
+  // Server-side TypeScript: the sync engine, the seed/admin scripts, and the
+  // on-demand sync endpoint.
+  //
+  // This exists because none of it was being typechecked. The root tsconfig
+  // references only tsconfig.app.json and tsconfig.node.json, so `tsc -b`
+  // covered src/ and the Vite config and silently ignored everything under
+  // scripts/ and api/ — the code that holds the service-account key and writes
+  // every member's XP. Errors there surfaced at runtime, in a cron job, or not
+  // at all.
+  //
+  // Referenced from tsconfig.json so plain `tsc -b` covers it.
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "noEmit": true,
+    "composite": true,
+    "types": ["node"]
+  },
+  "include": ["scripts/**/*.ts", "api/**/*.ts", "src/types/**/*.ts", "src/lib/week.ts", "src/lib/gamification.ts", "src/lib/problemSlug.ts", "src/lib/stats.ts"]
+}
