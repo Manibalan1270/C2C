@@ -15,39 +15,28 @@ function excerptOf(body: string, max = 140) {
   return body.length > max ? `${body.slice(0, max).trimEnd()}…` : body;
 }
 
-// Placeholder content shown until blogPosts is seeded (or reachable).
+/**
+ * Placeholder cards shown until a real post is published.
+ *
+ * These used to read as genuine posts — "From zero to first hackathon win",
+ * "One member's story of going from 'What's a linked list?' to a winning SIH
+ * team". On a public marketing page that is fabricated content: a visitor
+ * cannot tell it from something the club actually wrote, so the site would
+ * have been advertising a hackathon win that may never have happened.
+ *
+ * Rewritten to be unmistakably empty-state copy, matching how the Events and
+ * Board sections handle the same situation ("Add a date", "Add Name"). The
+ * cost of an obviously-unfinished section is far lower than the cost of a
+ * plausible lie.
+ */
 const MOCK_POSTS: BlogPostDoc[] = [
   {
     postId: "mock-1",
-    title: "How we run our weekly challenges",
+    title: "No posts yet",
     category: "news",
     author: "mock",
     status: "published",
-    body: "A behind-the-scenes look at how Easy/Medium/Hard problems get picked each week.",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createdAt: null as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    updatedAt: null as any,
-  },
-  {
-    postId: "mock-2",
-    title: "From zero to first hackathon win",
-    category: "journey",
-    author: "mock",
-    status: "published",
-    body: "One member's story of going from 'What's a linked list?' to a winning SIH team.",
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createdAt: null as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    updatedAt: null as any,
-  },
-  {
-    postId: "mock-3",
-    title: "Building the C2C leaderboard",
-    category: "news",
-    author: "mock",
-    status: "published",
-    body: "What goes into ranking members fairly — and why XP beats raw problem count.",
+    body: "Club news and write-ups will appear here once the first post is published.",
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     createdAt: null as any,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
