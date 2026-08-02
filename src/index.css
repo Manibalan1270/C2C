@@ -246,6 +246,18 @@ body {
   font-family: var(--font-body);
 }
 
+/* Hides the scrollbar on a strip that is meant to be swiped, without
+   disabling the scrolling itself (`overflow: hidden` would). Used on the
+   members nav, where a visible scrollbar would cut across the tab labels on
+   a phone. */
+.scrollbar-none {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* old Edge */
+}
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+
 /* Footer marquee strip — pure CSS translateX loop, no JS, so it's cheap
    regardless of how long it runs. */
 @keyframes marquee-scroll {

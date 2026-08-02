@@ -74,7 +74,7 @@ export default function MembersLayout() {
             a flat full-width bar with one hairline underneath is what the
             LeetCode direction actually calls for. */}
         <div className="sticky top-0 z-30 border-b border-galaxy-line bg-galaxy-nav">
-          <header className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-3 px-4">
+          <header className="mx-auto flex max-w-6xl items-center gap-3 px-4 sm:gap-6">
             <Link
               to="/"
               title="Back to the club website"
@@ -97,16 +97,37 @@ export default function MembersLayout() {
               </span>
             </Link>
 
-            {/* Left-aligned against the wordmark, as in the reference, rather
-                than centred in the bar. */}
-            <nav className="flex flex-1 flex-wrap items-center gap-6">
+            {/*
+              Scrolls horizontally instead of wrapping.
+
+              This bar used to be `flex-wrap`, which at 360px reflowed the
+              logo, the five tabs and the account chip into four ragged rows
+              with the wordmark stranded in the middle of them. Wrapping is the
+              wrong behaviour for a nav bar: a bar has a fixed height and a
+              known left and right edge, and letting it grow vertically breaks
+              both. Overflow gives the tabs somewhere to go that costs no
+              layout.
+
+              `min-w-0` is what actually makes it work — a flex child defaults
+              to `min-width: auto`, which means it refuses to shrink below its
+              content and pushes the account chip off-screen instead of
+              scrolling. Removing that floor is the whole fix.
+
+              scrollbar-none keeps a phone from drawing a scrollbar across the
+              tabs; the row is discoverable by swiping, which is how every
+              other horizontal strip on a phone works.
+            */}
+            <nav className="scrollbar-none flex min-w-0 flex-1 items-center gap-5 overflow-x-auto sm:gap-6">
               {tabs.map(({ to, label, icon: Icon }) => (
                 <NavLink
                   key={to}
                   to={to}
                   className={({ isActive }) =>
                     [
-                      "group relative flex items-center gap-2 px-1 py-4 font-tech text-[0.9rem] font-medium transition-colors duration-150",
+                      // shrink-0 so tabs keep their own width and the row
+                      // scrolls, rather than every label being squeezed until
+                      // the text wraps inside each tab.
+                      "group relative flex shrink-0 items-center gap-2 px-1 py-4 font-tech text-[0.9rem] font-medium transition-colors duration-150",
                       isActive
                         ? "text-galaxy-text"
                         : "text-galaxy-muted hover:text-galaxy-text",
@@ -133,18 +154,24 @@ export default function MembersLayout() {
               ))}
             </nav>
 
-            <div className="flex shrink-0 items-center gap-2.5">
-              <div className="flex items-center gap-2.5 rounded-full border border-galaxy-line bg-galaxy-deep py-1 pl-1 pr-3.5">
+            <div className="flex shrink-0 items-center gap-1.5 sm:gap-2.5">
+              {/* On a phone the chip collapses to the avatar alone. The name
+                  and XP are ~140px of the 360px viewport, and they are
+                  redundant here — the member knows who they are, and the same
+                  numbers are the headline of the Dashboard and Profile. The
+                  border and padding go with the text so a lone avatar doesn't
+                  sit in an empty pill. */}
+              <div className="flex items-center gap-2.5 rounded-full py-1 sm:border sm:border-galaxy-line sm:bg-galaxy-deep sm:pl-1 sm:pr-3.5">
                 {user?.photoURL ? (
                   <img
                     src={user.photoURL}
                     alt=""
-                    className="h-7 w-7 rounded-full object-cover"
+                    className="h-7 w-7 shrink-0 rounded-full object-cover"
                   />
                 ) : (
-                  <div className="h-7 w-7 rounded-full bg-gradient-to-br from-galaxy-accent to-galaxy-accent-hover" />
+                  <div className="h-7 w-7 shrink-0 rounded-full bg-gradient-to-br from-galaxy-accent to-galaxy-accent-hover" />
                 )}
-                <div className="text-[0.7rem] leading-tight">
+                <div className="hidden text-[0.7rem] leading-tight sm:block">
                   <p className="font-tech font-medium tracking-wide">
                     {user?.displayName?.split(" ")[0] ?? "Member"}
                   </p>
@@ -197,7 +224,9 @@ export default function MembersLayout() {
           </header>
         </div>
 
-        <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">
+        {/* px-4 on a phone: 6 (24px each side) of a 360px viewport is 13% of
+            the screen spent on margin, which squeezes the stat cards badly. */}
+        <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
           <Outlet />
         </main>
 

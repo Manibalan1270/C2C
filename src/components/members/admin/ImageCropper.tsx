@@ -20,8 +20,45 @@ import type { CropAspect } from "./cropAspects";
  * correctness concern, not just a nicety: see `encodeWithinBudget`.
  */
 
-/** Viewport size of the crop stage, px. */
-const STAGE_W = 420;
+/**
+ * Widest the crop stage is allowed to get, px.
+ *
+ * The actual width is this or the viewport minus the dialog's chrome,
+ * whichever is smaller — see `useStageWidth`. It was a flat 420, which
+ * overflowed any phone: at 360px the dialog is ~330px wide and a 420px canvas
+ * pushed straight out of it, so the right-hand side of the image (and the edge
+ * of the crop frame) was unreachable on the device most likely to be holding
+ * the photo.
+ */
+const MAX_STAGE_W = 420;
+
+/** Dialog padding (p-5 both sides) plus the screen padding (p-4 both sides). */
+const DIALOG_CHROME = 20 * 2 + 16 * 2;
+
+/**
+ * Stage width that fits the current viewport.
+ *
+ * Tracked in state rather than measured once, so rotating a phone re-fits the
+ * stage instead of leaving it clipped in the new orientation.
+ */
+function useStageWidth(): number {
+  const [width, setWidth] = useState(() =>
+    typeof window === "undefined"
+      ? MAX_STAGE_W
+      : Math.min(MAX_STAGE_W, window.innerWidth - DIALOG_CHROME),
+  );
+  useEffect(() => {
+    const onResize = () =>
+      setWidth(Math.min(MAX_STAGE_W, window.innerWidth - DIALOG_CHROME));
+    window.addEventListener("resize", onResize);
+    window.addEventListener("orientationchange", onResize);
+    return () => {
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onResize);
+    };
+  }, []);
+  return Math.max(200, width);
+}
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 4;
@@ -64,6 +101,7 @@ export default function ImageCropper({
 
   const dragRef = useRef<{ x: number; y: number; ox: number; oy: number } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const STAGE_W = useStageWidth();
 
   const stageH = Math.round(STAGE_W / aspect.ratio);
 
@@ -100,7 +138,7 @@ export default function ImageCropper({
         y: Math.min(maxY, Math.max(-maxY, next.y)),
       };
     },
-    [img, coverScale, stageH],
+    [img, coverScale, stageH, STAGE_W],
   );
 
   // Re-clamp whenever zoom changes, so zooming out can't strand the image
@@ -131,7 +169,7 @@ export default function ImageCropper({
       drawW,
       drawH,
     );
-  }, [img, zoom, offset, coverScale, stageH]);
+  }, [img, zoom, offset, coverScale, stageH, STAGE_W]);
 
   function onPointerDown(e: React.PointerEvent) {
     if (!img) return;

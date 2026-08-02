@@ -33,7 +33,7 @@ const SITE_TABS = [
 
 const tabClass = ({ isActive }: { isActive: boolean }) =>
   [
-    "flex items-center gap-2 rounded-md px-3 py-1.5 font-tech text-[0.8rem] font-medium transition-colors",
+    "flex shrink-0 items-center gap-2 rounded-md px-3 py-1.5 font-tech text-[0.8rem] font-medium transition-colors",
     isActive
       ? "bg-galaxy-surface-hover text-galaxy-text"
       : "text-galaxy-muted hover:bg-galaxy-surface-hover/60 hover:text-galaxy-text",
@@ -58,8 +58,12 @@ export default function AdminLayout() {
       </header>
 
       <nav className="flex flex-col gap-2 border-b border-galaxy-line pb-3">
-        <div className="flex flex-wrap items-center gap-1">
-          <span className="mr-1 font-tech text-[0.6rem] uppercase tracking-[0.18em] text-galaxy-dim">
+        {/* Scrolls rather than wraps, same reasoning as the main nav: eight
+            tabs across two groups turn into five ragged rows at 360px, and the
+            App/Site grouping — the whole point of the split — stops being
+            legible once each group spans several lines. */}
+        <div className="scrollbar-none flex items-center gap-1 overflow-x-auto">
+          <span className="mr-1 shrink-0 font-tech text-[0.6rem] uppercase tracking-[0.18em] text-galaxy-dim">
             App
           </span>
           {ADMIN_TABS.map(({ to, label, icon: Icon, end }) => (
@@ -70,8 +74,8 @@ export default function AdminLayout() {
           ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-1">
-          <span className="mr-1 font-tech text-[0.6rem] uppercase tracking-[0.18em] text-galaxy-dim">
+        <div className="scrollbar-none flex items-center gap-1 overflow-x-auto">
+          <span className="mr-1 shrink-0 font-tech text-[0.6rem] uppercase tracking-[0.18em] text-galaxy-dim">
             Site
           </span>
           {SITE_TABS.map(({ to, label, icon: Icon, end }) => (
