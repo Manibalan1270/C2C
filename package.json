@@ -12,7 +12,7 @@
     "seed:demo": "tsx scripts/seedFirestore.ts --demo",
     "promote": "tsx scripts/promoteAdmin.ts",
     "sync": "tsx scripts/syncPlatforms.ts",
-    "check:sync": "tsx scripts/__checks__/streak.check.ts && tsx scripts/__checks__/award.check.ts && tsx scripts/__checks__/challengeMatch.check.ts",
+    "check:sync": "tsx scripts/__checks__/streak.check.ts && tsx scripts/__checks__/award.check.ts && tsx scripts/__checks__/challengeMatch.check.ts && tsx scripts/__checks__/verify.check.ts",
     "deploy:rules": "firebase deploy --only firestore:rules,firestore:indexes",
     "check:rules": "firebase emulators:exec --only firestore \"tsx scripts/__checks__/rules.check.ts\"",
     "check:security": "tsx scripts/__checks__/liveRules.check.ts",

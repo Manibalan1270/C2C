@@ -2,7 +2,6 @@ import { useCallback } from "react";
 import { SiHackerrank, SiLeetcode } from "react-icons/si";
 import {
   PiChartDonutDuotone,
-  PiEyeSlashDuotone,
   PiLinkSimpleBold,
   PiMedalDuotone,
   PiSparkleDuotone,
@@ -18,12 +17,32 @@ import Meter from "../../components/members/charts/Meter";
 import BarList, { type BarDatum } from "../../components/members/charts/BarList";
 import { ORDINAL, XP_MARK } from "../../components/members/charts/chartTokens";
 import LinkAccountRow from "../../components/members/LinkAccountRow";
+import { usePlatformVerify } from "../../hooks/usePlatformVerify";
 
 export default function Profile() {
   const { user, userDoc, role, docLoading } = useAuth();
   const { solvedByDifficulty, total: totalSolved, loading: breakdownLoading } =
     useProfileBreakdown();
   const { meta: badgeMeta } = useBadgeMeta();
+  const { verify, checking, result: liveStatus, available: canVerify } = usePlatformVerify();
+
+  /**
+   * A live check wins over the stored one: the member just asked for it and
+   * expects the answer they triggered, not a value a cron wrote up to fifteen
+   * minutes ago.
+   */
+  function statusFor(platform: "leetcode" | "hackerrank") {
+    const live = liveStatus[platform];
+    if (!live) return userDoc?.platformStatus?.[platform] ?? null;
+    return {
+      verified: live.verified,
+      detailsPublic: live.detailsPublic,
+      detail: live.detail,
+      error: live.error,
+      // Live results carry no server timestamp, and nothing renders one.
+      checkedAt: null as never,
+    };
+  }
 
   const xp = userDoc?.xp ?? 0;
   const anyLinked =
@@ -134,6 +153,9 @@ export default function Profile() {
             username={userDoc?.leetcodeUsername ?? null}
             blurb="Not linked — we'll track your solved problems automatically"
             onSave={(value) => savePlatform("leetcodeUsername", value)}
+            status={statusFor("leetcode")}
+            checking={checking === "leetcode"}
+            onVerify={canVerify ? (u) => verify("leetcode", u) : undefined}
           />
           <LinkAccountRow
             icon={<SiHackerrank />}
@@ -142,45 +164,16 @@ export default function Profile() {
             username={userDoc?.hackerrankUsername ?? null}
             blurb="Not linked — we'll track your badges and submissions"
             onSave={(value) => savePlatform("hackerrankUsername", value)}
+            status={statusFor("hackerrank")}
+            checking={checking === "hackerrank"}
+            onVerify={canVerify ? (u) => verify("hackerrank", u) : undefined}
           />
 
-          {/*
-            Only shown once the sync has actually looked and found the history
-            hidden. `undefined` means it hasn't run yet, and warning then would
-            be guessing — the member would go change a setting that may already
-            be correct.
-
-            Deliberately not styled as an error: XP, streaks and the
-            leaderboard all work fine without this. The single thing it costs
-            is per-challenge completion, so it says exactly that.
-          */}
-          {userDoc?.leetcodeUsername && userDoc?.leetcodeHistoryPublic === false && (
-            <div className="rounded-xl border border-galaxy-line bg-galaxy-deep p-4">
-              <p className="flex items-center gap-2 text-sm font-medium">
-                <PiEyeSlashDuotone className="h-4 w-4 shrink-0 text-galaxy-accent-text" />
-                Challenges aren't ticking off?
-              </p>
-              <p className="mt-2 text-xs leading-relaxed text-galaxy-muted">
-                Your LeetCode submission history is private, so we can see{" "}
-                <em>how many</em> problems you've solved but not <em>which ones</em>.
-                XP and streaks still work — only the weekly challenge checkmarks
-                are affected.
-              </p>
-              <p className="mt-2 text-xs leading-relaxed text-galaxy-muted">
-                To fix it, open{" "}
-                <a
-                  href="https://leetcode.com/profile/"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-galaxy-accent-text underline underline-offset-2"
-                >
-                  LeetCode profile settings
-                </a>{" "}
-                and turn on the public submission history option. The next sync
-                will pick it up.
-              </p>
-            </div>
-          )}
+          {/* The private-history warning used to live here as a separate
+              panel. It now sits inline on the LeetCode row itself, next to the
+              handle it is about — saying it in two places would be one place
+              too many, and the row is where a member is already looking when
+              they wonder about their link. */}
         </div>
       </Panel>
 

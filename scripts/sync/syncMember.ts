@@ -14,7 +14,7 @@
  * `dryRun` is a parameter rather than a module-level flag read off argv,
  * because a serverless handler has no argv worth reading.
  */
-import { FieldValue } from "firebase-admin/firestore";
+import { FieldValue, Timestamp } from "firebase-admin/firestore";
 import { adminDb } from "../lib/adminApp";
 import {
   COLLECTIONS,
@@ -37,6 +37,32 @@ import { applyXpDelta, awardProgress } from "./awardSolves";
 import { awardMatchedChallenges } from "./awardChallenges";
 import { computeProgression } from "./progression";
 import { buildStatsCache } from "./statsCache";
+
+
+/**
+ * Platform status derived from what this run already observed.
+ *
+ * Deliberately reuses the data the sync just fetched rather than calling
+ * verifyPlatformHandle again. A badge on a profile page is not worth a second
+ * round trip to someone else's API, and re-asking could even disagree with
+ * what the sync acted on moments earlier.
+ */
+function statusFrom(
+  linked: string | null | undefined,
+  ok: boolean,
+  detailsPublic: boolean,
+  detail: string,
+  error: string | null,
+) {
+  if (!linked) return null;
+  return {
+    verified: ok,
+    detailsPublic,
+    detail,
+    error,
+    checkedAt: Timestamp.now(),
+  };
+}
 
 export async function syncMember(
   user: UserDoc,
@@ -68,11 +94,19 @@ export async function syncMember(
   // privacy setting on an account they haven't linked.
   let recentSolves: RecentSolve[] = [];
   let historyPublic = true;
+  let leetcodeOk = false;
+  let leetcodeDetail = "";
+  let leetcodeError: string | null = null;
+  let hackerrankOk = false;
+  let hackerrankDetail = "";
+  let hackerrankError: string | null = null;
 
   if (user.leetcodeUsername) {
     const result = await fetchLeetCodeProgress(user.leetcodeUsername);
-    if (result.error) errors.push(result.error);
+    if (result.error) { errors.push(result.error); leetcodeError = result.error; }
     if (result.counts) {
+      leetcodeOk = true;
+      leetcodeDetail = `${result.counts.easy + result.counts.medium + result.counts.hard} solved`;
       leetcodeCounts = result.counts;
       nextState.leetcode = result.counts;
       const total = result.counts.easy + result.counts.medium + result.counts.hard;
@@ -98,8 +132,10 @@ export async function syncMember(
 
   if (user.hackerrankUsername) {
     const result = await fetchHackerRankProgress(user.hackerrankUsername);
-    if (result.error) errors.push(result.error);
+    if (result.error) { errors.push(result.error); hackerrankError = result.error; }
     if (result.badgeCount != null) {
+      hackerrankOk = true;
+      hackerrankDetail = result.badgeCount === 1 ? "1 badge" : `${result.badgeCount} badges`;
       nextState.hackerrankBadges = result.badgeCount;
       if (previous.hackerrankBadges != null) {
         plan.hackerrank = {
@@ -176,6 +212,14 @@ export async function syncMember(
         lastSyncedAt: FieldValue.serverTimestamp(),
         lastSyncError: errors.length > 0 ? errors.join(" · ") : null,
         leetcodeHistoryPublic: user.leetcodeUsername ? historyPublic : null,
+        platformStatus: {
+          ...(statusFrom(user.leetcodeUsername, leetcodeOk, historyPublic, leetcodeDetail, leetcodeError)
+            ? { leetcode: statusFrom(user.leetcodeUsername, leetcodeOk, historyPublic, leetcodeDetail, leetcodeError) }
+            : {}),
+          ...(statusFrom(user.hackerrankUsername, hackerrankOk, hackerrankOk, hackerrankDetail, hackerrankError)
+            ? { hackerrank: statusFrom(user.hackerrankUsername, hackerrankOk, hackerrankOk, hackerrankDetail, hackerrankError) }
+            : {}),
+        },
       });
     }
     const idle = ["no change"];
@@ -216,6 +260,14 @@ export async function syncMember(
         // otherwise so the Profile page can tell "not applicable" apart from
         // "we checked and it's private".
         leetcodeHistoryPublic: user.leetcodeUsername ? historyPublic : null,
+        platformStatus: {
+          ...(statusFrom(user.leetcodeUsername, leetcodeOk, historyPublic, leetcodeDetail, leetcodeError)
+            ? { leetcode: statusFrom(user.leetcodeUsername, leetcodeOk, historyPublic, leetcodeDetail, leetcodeError) }
+            : {}),
+          ...(statusFrom(user.hackerrankUsername, hackerrankOk, hackerrankOk, hackerrankDetail, hackerrankError)
+            ? { hackerrank: statusFrom(user.hackerrankUsername, hackerrankOk, hackerrankOk, hackerrankDetail, hackerrankError) }
+            : {}),
+        },
         ...(progression.newBadgeIds.length > 0
           ? { badgeIds: FieldValue.arrayUnion(...progression.newBadgeIds) }
           : {}),

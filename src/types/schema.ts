@@ -93,6 +93,39 @@ export interface PlatformSyncState {
 }
 
 /**
+ * What we can actually prove about a linked platform handle.
+ *
+ * Two independent facts, deliberately kept apart because they have different
+ * fixes and different consequences:
+ *
+ *   `verified`      the handle exists and its profile is readable by a
+ *                   logged-out visitor. False means a typo, a deleted
+ *                   account, or a profile set to private — nothing works.
+ *
+ *   `detailsPublic` LeetCode only: the member's SUBMISSION HISTORY is public,
+ *                   which is what lets a solve be matched to a specific weekly
+ *                   challenge. False is not an error: XP, streaks, badges and
+ *                   leaderboard placement all still work. The single thing
+ *                   lost is challenge auto-completion.
+ *
+ * Conflating them would be a real disservice — telling a member their account
+ * is "not verified" when it is fine and only a privacy toggle is off would
+ * send them hunting for a problem that doesn't exist.
+ *
+ * HackerRank has no separate history concept: its badge list is the profile,
+ * so `detailsPublic` mirrors `verified` there.
+ */
+export interface PlatformStatus {
+  verified: boolean;
+  detailsPublic: boolean;
+  /** Human-readable proof, e.g. "142 solved" or "4 badges". */
+  detail: string;
+  /** Why verification failed, when it did. */
+  error?: string | null;
+  checkedAt: Timestamp;
+}
+
+/**
  * Denormalised dashboard cache, written only by the sync engine (a
  * scheduled GitHub Actions job using the admin SDK — see UserDoc.stats).
  * Absent until the first sync run; the client derives a fallback from
@@ -156,6 +189,17 @@ export interface UserDoc {
    * Undefined until the first sync run has looked.
    */
   leetcodeHistoryPublic?: boolean | null;
+
+  /**
+   * Last known status of each linked platform handle.
+   *
+   * Persisted so the Profile can show "Verified" immediately on load without
+   * hitting LeetCode on every page view — we are a guest on their
+   * infrastructure and a profile page is not a good reason to spend a request.
+   * Refreshed whenever the sync runs, and immediately when a member saves a
+   * new handle (which is the moment they actually want the answer).
+   */
+  platformStatus?: Partial<Record<CodingPlatform, PlatformStatus>> | null;
 }
 
 // ---------------------------------------------------------------------------
