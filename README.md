@@ -91,6 +91,60 @@ surfaces as an error on their own profile rather than failing silently.
 
 ---
 
+## On-demand sync ("Refresh my stats")
+
+The cron runs every 15 minutes. That is GitHub's practical floor — scheduled
+runs drift 5-15 minutes under load, so a tighter cron buys nothing real. For an
+instant answer to "did the site notice I solved it?", `api/sync.ts` syncs a
+single member on demand.
+
+It is **optional**. Leave `VITE_SYNC_API_URL` unset and the button hides itself;
+the cron still runs.
+
+### Deploying it
+
+Any Node serverless host works. **Not Cloudflare Workers** — those are V8
+isolates without Node APIs, and `firebase-admin` needs both.
+
+```bash
+npx vercel            # from the repo root; deploys api/ only
+```
+
+Then set, in the Vercel project's environment variables:
+
+| Variable | Value |
+| --- | --- |
+| `FIREBASE_SERVICE_ACCOUNT_JSON` | the whole key file, one line |
+
+…and in your local `.env` plus the hosting build:
+
+| Variable | Value |
+| --- | --- |
+| `VITE_SYNC_API_URL` | the deployed URL, e.g. `https://c2c-sync.vercel.app` |
+
+Rebuild and redeploy the SPA (`npm run build && npx firebase deploy --only
+hosting`) so the new env var is baked in.
+
+### Why it is safe to hold a service-account key there
+
+The key bypasses every Firestore rule, so the endpoint is written to be
+narrow rather than convenient:
+
+- It syncs **only the caller's own uid**, taken from a signature-verified
+  Firebase ID token. The uid is never read from the request body — that would
+  let anyone force a sync for any member.
+- `verifyIdToken(token, true)` checks revocation, so a signed-out session
+  cannot keep using an unexpired token.
+- A 30-second per-member cooldown, enforced from their own `lastSyncedAt`, so a
+  held-down button cannot become a request flood against LeetCode. That rate
+  limit protects **them**, not us — we are a guest on their infrastructure.
+- CORS is restricted to the known origins.
+
+Never put the service account in a `VITE_`-prefixed variable. Vite inlines
+those into the browser bundle.
+
+---
+
 ## Setup
 
 ```bash

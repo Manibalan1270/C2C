@@ -1,0 +1,10 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/sync.ts": {
+      "maxDuration": 30
+    }
+  },
+  "buildCommand": "echo 'API only - the SPA is deployed to Firebase Hosting'",
+  "outputDirectory": "public"
+}

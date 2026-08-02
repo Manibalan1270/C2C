@@ -1,5 +1,6 @@
 import { PiArrowsClockwiseBold } from "react-icons/pi";
 import { useAuth } from "../../lib/AuthContext";
+import { useManualSync } from "../../hooks/useManualSync";
 
 /**
  * "Last checked N minutes ago."
@@ -26,8 +27,16 @@ function relativeMinutes(ms: number): string {
   return days === 1 ? "1 day ago" : `${days} days ago`;
 }
 
-export default function SyncStatus({ className = "" }: { className?: string }) {
+export default function SyncStatus({
+  className = "",
+  onRefreshed,
+}: {
+  className?: string;
+  /** Called after a successful manual sync so the page can refetch. */
+  onRefreshed?: () => void;
+}) {
   const { userDoc } = useAuth();
+  const { run, state, message, available } = useManualSync(onRefreshed);
 
   // No linked account means the engine deliberately skips this member, so
   // "never synced" is correct rather than broken — say the actionable thing.
@@ -40,19 +49,45 @@ export default function SyncStatus({ className = "" }: { className?: string }) {
   }
 
   const ms = userDoc?.lastSyncedAt?.toMillis?.();
+  const syncing = state === "syncing";
 
   return (
-    <p
-      className={`flex items-center gap-1.5 font-mono text-xs text-galaxy-dim ${className}`}
-    >
-      <PiArrowsClockwiseBold className="h-3 w-3 shrink-0" aria-hidden="true" />
-      {ms ? (
-        <>
-          Last checked {relativeMinutes(ms)} · updates roughly every 15 minutes
-        </>
-      ) : (
-        <>Waiting for the first check — this can take up to 15 minutes.</>
+    <div className={`flex flex-wrap items-center gap-x-3 gap-y-1 ${className}`}>
+      <p className="flex items-center gap-1.5 font-mono text-xs text-galaxy-dim">
+        <PiArrowsClockwiseBold
+          className={`h-3 w-3 shrink-0 ${syncing ? "animate-spin" : ""}`}
+          aria-hidden="true"
+        />
+        {ms ? (
+          <>Last checked {relativeMinutes(ms)} · updates every 15 minutes</>
+        ) : (
+          <>Waiting for the first check — this can take up to 15 minutes.</>
+        )}
+      </p>
+
+      {/* Hidden entirely when the endpoint isn't configured. A refresh button
+          that always errors is worse than no refresh button. */}
+      {available && (
+        <button
+          type="button"
+          onClick={run}
+          disabled={syncing}
+          className="rounded-full bg-galaxy-control px-3 py-1 font-tech text-[0.7rem] font-semibold text-galaxy-text transition-colors hover:bg-galaxy-control-hover disabled:opacity-60"
+        >
+          {syncing ? "Checking…" : "Refresh now"}
+        </button>
       )}
-    </p>
+
+      {message && (
+        <span
+          role="status"
+          className={`font-mono text-xs ${
+            state === "error" ? "text-[var(--chart-bad)]" : "text-galaxy-muted"
+          }`}
+        >
+          {message}
+        </span>
+      )}
+    </div>
   );
 }
