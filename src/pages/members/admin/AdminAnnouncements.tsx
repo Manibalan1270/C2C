@@ -18,7 +18,9 @@ function formatPosted(a: AnnouncementDoc): string {
 
 export default function AdminAnnouncements() {
   const actor = useActor();
-  const { announcements, loading, reload } = useAnnouncements();
+  // Explicit cap: the member-facing default is a handful, but an admin
+  // managing the list needs to see the back catalogue to delete from it.
+  const { announcements, loading, reload } = useAnnouncements(25);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
   const [busy, setBusy] = useState(false);

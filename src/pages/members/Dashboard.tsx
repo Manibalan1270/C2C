@@ -3,14 +3,17 @@ import {
   PiCaretUpBold,
   PiChartBarDuotone,
   PiFireDuotone,
+  PiMegaphoneDuotone,
   PiMinusBold,
   PiRankingDuotone,
   PiSparkleDuotone,
   PiTargetDuotone,
 } from "react-icons/pi";
+import type { AnnouncementDoc } from "../../types/schema";
 import { useAuth } from "../../lib/AuthContext";
 import { useMemberStats } from "../../hooks/useMemberStats";
 import { useWeeklyChallenges } from "../../hooks/useWeeklyChallenges";
+import { useAnnouncements } from "../../hooks/useAnnouncements";
 import { levelForXp, xpIntoLevel, XP_PER_LEVEL } from "../../lib/gamification";
 import Panel from "../../components/members/Panel";
 import SyncStatus from "../../components/members/SyncStatus";
@@ -36,10 +39,31 @@ function StatValue({ children }: { children: React.ReactNode }) {
   return <p className="mt-1 text-3xl font-semibold leading-none">{children}</p>;
 }
 
+/**
+ * When an announcement was posted, relative.
+ *
+ * `postedAt` is a serverTimestamp sentinel until the write round-trips, so it
+ * is legitimately absent on one that was just created — "just now" is the
+ * honest answer there, not a missing date.
+ */
+function postedAgo(a: AnnouncementDoc): string {
+  const ms = a.postedAt?.toMillis?.();
+  if (!ms) return "just now";
+  const mins = Math.max(0, Math.round((Date.now() - ms) / 60000));
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.round(hours / 24);
+  if (days < 7) return `${days}d ago`;
+  return new Date(ms).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+}
+
 export default function Dashboard() {
   const { user, userDoc, docLoading } = useAuth();
   const { stats, loading: statsLoading } = useMemberStats();
   const { goal } = useWeeklyChallenges();
+  const { announcements } = useAnnouncements();
   const firstName = user?.displayName?.split(" ")[0] ?? "there";
 
   const xp = userDoc?.xp ?? 0;
@@ -161,6 +185,36 @@ export default function Dashboard() {
           </p>
         </Panel>
       </div>
+
+      {/* Above Activity on purpose. An announcement is time-sensitive news the
+          club is trying to tell everyone — burying it under a chart the member
+          has already seen would defeat the point of posting one. It renders
+          only when there is something to say, so the Dashboard doesn't carry a
+          permanent empty box. */}
+      {announcements.length > 0 && (
+        <Panel title="Announcements" icon={PiMegaphoneDuotone}>
+          <ul className="m-0 flex list-none flex-col gap-3 p-0">
+            {announcements.map((a) => (
+              <li
+                key={a.announcementId}
+                className="rounded-xl border border-galaxy-line bg-galaxy-deep p-4"
+              >
+                <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
+                  <p className="text-sm font-semibold">{a.title}</p>
+                  <p className="font-mono text-[0.65rem] text-galaxy-dim">
+                    {postedAgo(a)}
+                  </p>
+                </div>
+                {/* whitespace-pre-wrap: admins type these in a textarea and
+                    their paragraph breaks are meaningful. */}
+                <p className="mt-2 whitespace-pre-wrap text-xs leading-relaxed text-galaxy-muted">
+                  {a.body}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </Panel>
+      )}
 
       <Panel
         title="Activity"

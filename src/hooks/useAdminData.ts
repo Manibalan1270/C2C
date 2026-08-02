@@ -1,12 +1,14 @@
 import { useAuth } from "../lib/AuthContext";
 import { useAsync } from "./useAsync";
+// Announcements are a member-facing feature; the hook lives with the rest of
+// them. Re-exported so the admin screen keeps its existing import path.
+export { useAnnouncements } from "./useAnnouncements";
 import {
   fetchAllMembers,
   fetchAuditLog,
   fetchBadgeDefinitions,
   type Actor,
 } from "../lib/queries/admin";
-import { fetchAnnouncements } from "../lib/queries/announcements";
 import {
   fetchAllBoardMembers,
   fetchAllEvents,
@@ -14,7 +16,6 @@ import {
 } from "../lib/queries/site";
 import type {
   AdminAuditLogDoc,
-  AnnouncementDoc,
   BadgeDoc,
   BlogPostDoc,
   BoardMemberDoc,
@@ -45,13 +46,6 @@ export function useAuditLog(max = 50) {
   return { entries: data ?? [], loading, error, reload };
 }
 
-export function useAnnouncements(max = 25) {
-  const { data, loading, error, reload } = useAsync<AnnouncementDoc[]>(
-    () => fetchAnnouncements(max),
-    [max],
-  );
-  return { announcements: data ?? [], loading, error, reload };
-}
 
 export function useBadgeDefinitions() {
   const { data, loading, error, reload } = useAsync<BadgeDoc[]>(
