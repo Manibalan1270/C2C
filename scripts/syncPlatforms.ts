@@ -199,9 +199,15 @@ async function syncMember(
       });
   }
 
+  // XP from both award paths. Reporting only the count-based figure was
+  // actively misleading: a member whose entire run was challenge completions
+  // saw "+0 XP" in the log next to a "completed: ..." note, which reads as a
+  // bug in the thing that had just worked.
+  const totalXpAwarded = award.xpAwarded + challengeAward.xpAwarded;
   const parts = [
     `+${award.newAwards} solves`,
-    `+${award.xpAwarded} XP`,
+    `+${challengeAward.newAwards} challenges`,
+    `+${totalXpAwarded} XP`,
     `L${progression.level}`,
     `streak ${progression.currentStreak}`,
   ];
