@@ -6,8 +6,8 @@
  * Usage: npm run promote -- --email=you@svce.ac.in
  */
 import { getAuth } from "firebase-admin/auth";
-import { adminApp, adminDb } from "./lib/adminApp";
-import { COLLECTIONS, type UserRole } from "../src/types/schema";
+import { adminApp, adminDb } from "../lib/adminApp";
+import { COLLECTIONS, type UserRole } from "../../src/types/schema";
 
 function argValue(flag: string): string | undefined {
   const prefix = `--${flag}=`;

@@ -4,6 +4,37 @@ The coding club site for Sri Venkateswara College of Engineering: a public
 landing page, a members area with XP/streaks/leaderboards, and an admin panel
 that drives both.
 
+XP is awarded automatically — the site reads members' LeetCode and HackerRank
+profiles, matches solved problems against the week's challenges, and updates
+streaks, badges and the leaderboard without anyone touching a spreadsheet.
+
+**[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)** explains how the pieces fit
+together and why. Start there if you're reading this codebase for the first
+time — several decisions look odd until you know the constraint behind them.
+
+## Layout
+
+```
+src/                   the web app (React + Vite, deployed to Firebase Hosting)
+  components/
+    marketing/         public landing page
+    members/           signed-in area, incl. admin/ and charts/
+  pages/               one file per route
+  hooks/               data access for components
+  lib/                 Firebase, auth/theme context, queries, domain logic
+  types/schema.ts      the Firestore contract, shared by all three programs
+
+scripts/               sync engine + operator tooling (Node, Admin SDK)
+  cli/                 things a human runs: sync, seed, promote
+  checks/              test suites
+  lib/platforms/       LeetCode + HackerRank readers
+  sync/                the engine, one concern per file
+
+api/                   on-demand serverless endpoints (Vercel)
+docs/                  architecture notes and the original SRS
+firestore.rules        the ONLY authorisation layer — see ARCHITECTURE.md
+```
+
 ---
 
 ## The one thing that is not set up

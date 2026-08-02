@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import SectionHeading from "../SectionHeading";
-import RobotMascot from "../RobotMascot";
+import SectionHeading from "./SectionHeading";
+import RobotMascot from "./RobotMascot";
 import { useTypewriter } from "../../hooks/useTypewriter";
 
 const SPEED = 16;

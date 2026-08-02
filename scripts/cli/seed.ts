@@ -8,13 +8,13 @@
  *                                    for that uid (dev-only demo data)
  */
 import { FieldValue } from "firebase-admin/firestore";
-import { adminDb } from "./lib/adminApp";
-import { COLLECTIONS } from "../src/types/schema";
-import { BADGE_SEEDS } from "./seed/badges";
-import { currentWeekChallengeSeeds } from "./seed/challenges";
-import { demoPointsLogSeeds } from "./seed/demoPointsLog";
-import { BLOG_POST_SEEDS, BOARD_MEMBER_SEEDS, SITE_EVENT_SEEDS } from "./seed/site";
-import { DEFAULT_WEEKLY_GOAL } from "../src/lib/gamification";
+import { adminDb } from "../lib/adminApp";
+import { COLLECTIONS } from "../../src/types/schema";
+import { BADGE_SEEDS } from "../seed/badges";
+import { currentWeekChallengeSeeds } from "../seed/challenges";
+import { demoPointsLogSeeds } from "../seed/demoPointsLog";
+import { BLOG_POST_SEEDS, BOARD_MEMBER_SEEDS, SITE_EVENT_SEEDS } from "../seed/site";
+import { DEFAULT_WEEKLY_GOAL } from "../../src/lib/gamification";
 
 const SEED_ACTOR = "seed-script";
 

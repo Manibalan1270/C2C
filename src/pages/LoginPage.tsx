@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { GoogleAuthProvider, signInWithPopup, signOut } from "firebase/auth";
 import { FcGoogle } from "react-icons/fc";
-import { FloatingPaths } from "../components/ui/background-paths";
+import { FloatingPaths } from "../components/marketing/ui/background-paths";
 import clubLogo from "../assets/club-logo-transparent.png";
 import { auth } from "../lib/firebase";
 

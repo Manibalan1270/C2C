@@ -83,8 +83,7 @@ export default function MembersLayout() {
               {/* The targeting-reticle brackets that used to frame this are
                   gone: they were the last of the HUD motif, and corner
                   brackets around a wordmark read as sci-fi chrome next to a
-                  flat product bar. HudFrame itself is left in the tree rather
-                  than deleted — nothing else uses it now. */}
+                  flat product bar. */}
               <span className="flex items-center gap-2">
                 <img
                   src={clubLogo}

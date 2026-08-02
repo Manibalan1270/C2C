@@ -1,10 +1,10 @@
-import Nav from "../components/Nav";
-import Hero from "../components/Hero";
-import About from "../components/sections/About";
-import Events from "../components/sections/Events";
-import BlogPreview from "../components/sections/BlogPreview";
-import BoardMembers from "../components/sections/BoardMembers";
-import ContactFooter from "../components/sections/ContactFooter";
+import Nav from "../components/marketing/Nav";
+import Hero from "../components/marketing/Hero";
+import About from "../components/marketing/About";
+import Events from "../components/marketing/Events";
+import BlogPreview from "../components/marketing/BlogPreview";
+import BoardMembers from "../components/marketing/BoardMembers";
+import ContactFooter from "../components/marketing/ContactFooter";
 
 export default function HomePage() {
   return (

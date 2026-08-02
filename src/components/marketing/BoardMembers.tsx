@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import SectionHeading from "../SectionHeading";
-import { InfiniteSlider } from "../ui/infinite-slider";
+import SectionHeading from "./SectionHeading";
+import { InfiniteSlider } from "./ui/infinite-slider";
 import { fetchPublishedBoardMembers } from "../../lib/queries/site";
 import type { BoardMemberDoc } from "../../types/schema";
 

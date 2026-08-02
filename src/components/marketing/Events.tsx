@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import SectionHeading from "../SectionHeading";
-import Carousel from "../Carousel";
+import SectionHeading from "./SectionHeading";
+import Carousel from "./Carousel";
 import { fetchPublishedEvents } from "../../lib/queries/site";
 import type { SiteEventDoc } from "../../types/schema";
 

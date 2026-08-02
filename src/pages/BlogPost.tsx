@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import Nav from "../components/Nav";
-import ContactFooter from "../components/sections/ContactFooter";
+import Nav from "../components/marketing/Nav";
+import ContactFooter from "../components/marketing/ContactFooter";
 import { fetchPost } from "../lib/queries/site";
 import type { BlogPostDoc } from "../types/schema";
 

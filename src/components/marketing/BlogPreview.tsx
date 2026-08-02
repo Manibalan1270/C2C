@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import SectionHeading from "../SectionHeading";
-import Carousel from "../Carousel";
+import SectionHeading from "./SectionHeading";
+import Carousel from "./Carousel";
 import { fetchPublishedPosts } from "../../lib/queries/site";
 import type { BlogPostDoc } from "../../types/schema";
 

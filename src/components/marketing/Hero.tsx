@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, easeInOut, cubicBezier } from "framer-motion";
-import clubLogo from "../assets/club-logo-transparent.png";
-import { HERO_VH_MULTIPLIER } from "../lib/layout";
+import clubLogo from "../../assets/club-logo-transparent.png";
+import { HERO_VH_MULTIPLIER } from "../../lib/layout";
 import { HeroLines } from "./ui/hero-lines";
 
 // A "back out" curve — slight overshoot then settle — for the text's pop-in.

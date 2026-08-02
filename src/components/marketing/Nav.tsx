@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import clubLogo from "../assets/club-logo-transparent.png";
-import { HERO_VH_MULTIPLIER } from "../lib/layout";
-import { useAuth } from "../lib/AuthContext";
+import clubLogo from "../../assets/club-logo-transparent.png";
+import { HERO_VH_MULTIPLIER } from "../../lib/layout";
+import { useAuth } from "../../lib/AuthContext";
 
 const NAV_LINKS = [
   { label: "About Us", href: "#about" },

@@ -27,7 +27,7 @@
  *    lands on their own profile (`lastSyncError`) and the loop continues.
  */
 import { FieldValue } from "firebase-admin/firestore";
-import { adminDb } from "./lib/adminApp";
+import { adminDb } from "../lib/adminApp";
 import {
   COLLECTIONS,
   type BadgeDoc,
@@ -36,21 +36,21 @@ import {
   type LeaderboardSnapshotDoc,
   type UserDoc,
   type WeeklyChallengeDoc,
-} from "../src/types/schema";
-import { isoWeekKey } from "../src/lib/week";
-import { politeDelay } from "./lib/platforms/http";
+} from "../../src/types/schema";
+import { isoWeekKey } from "../../src/lib/week";
+import { politeDelay } from "../lib/platforms/http";
 import {
   fetchLeetCodeProgress,
   fetchLeetCodeRecentSolves,
   type RecentSolve,
-} from "./lib/platforms/leetcode";
-import { fetchHackerRankProgress } from "./lib/platforms/hackerrank";
-import { applyXpDelta, awardProgress } from "./sync/awardSolves";
-import { awardMatchedChallenges, loadMatchableChallenges } from "./sync/awardChallenges";
-import { computeProgression } from "./sync/progression";
-import { buildStatsCache } from "./sync/statsCache";
-import { fetchRecentSnapshots, writeWeeklySnapshot } from "./sync/snapshot";
-import { syncMember } from "./sync/syncMember";
+} from "../lib/platforms/leetcode";
+import { fetchHackerRankProgress } from "../lib/platforms/hackerrank";
+import { applyXpDelta, awardProgress } from "../sync/awardSolves";
+import { awardMatchedChallenges, loadMatchableChallenges } from "../sync/awardChallenges";
+import { computeProgression } from "../sync/progression";
+import { buildStatsCache } from "../sync/statsCache";
+import { fetchRecentSnapshots, writeWeeklySnapshot } from "../sync/snapshot";
+import { syncMember } from "../sync/syncMember";
 
 const DRY_RUN = process.argv.includes("--dry-run");
 
