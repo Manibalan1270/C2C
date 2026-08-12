@@ -1,7 +1,7 @@
 /**
  * Live smoke test of the platform readers. Hits the real endpoints, so it
  * needs network but no Firestore credentials.
- * Run with: npx tsx scripts/__checks__/platforms.check.ts
+ * Run with: npx tsx scripts/checks/platforms.check.ts
  */
 import { fetchLeetCodeProgress } from "../lib/platforms/leetcode";
 import { fetchHackerRankProgress } from "../lib/platforms/hackerrank";

@@ -1,7 +1,7 @@
 /**
  * Synthetic pointsLog entries so the Dashboard/Profile charts have
  * something real to render before the sync engine exists. Dev-only —
- * gated behind an explicit `--demo --uid=<uid>` flag in seedFirestore.ts,
+ * gated behind an explicit `--demo --uid=<uid>` flag in scripts/cli/seed.ts,
  * never run against production data by accident.
  *
  * Idempotent via a deterministic doc id (`demo__{uid}__{n}`), so re-running

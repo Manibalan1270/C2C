@@ -1,7 +1,7 @@
 /**
  * Verifies the award engine's idempotency contract without touching
  * Firestore: a fake batch/db records what *would* be written.
- * Run with: npx tsx scripts/__checks__/award.check.ts
+ * Run with: npx tsx scripts/checks/award.check.ts
  */
 import { awardProgress, leetcodeAwardId } from "../sync/awardSolves";
 

@@ -23,7 +23,7 @@ on:
     #
     # FIRESTORE QUOTA CEILING — this interval is not free above a club size.
     # Measured against the 50,000 reads/day Spark limit, with idle members
-    # skipping the recompute (see `nothingChanged` in syncPlatforms.ts):
+    # skipping the recompute (see `nothingChanged` in scripts/sync/syncMember.ts):
     #
     #     50 members  -> ~43% of quota      safe
     #    100 members  -> ~81% of quota      safe, watch it

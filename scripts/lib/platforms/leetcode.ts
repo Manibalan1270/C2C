@@ -21,7 +21,7 @@
  * The list is capped at 20 entries no matter what `limit` is passed; asking
  * for 500 still returns 20. For an extremely active solver that's roughly
  * four weeks of history, and for a typical club member it's many months, so a
- * six-hourly sync has an enormous margin. Anyone solving more than 20 problems
+ * fifteen-minute sync has an enormous margin. Anyone solving more than 20 problems
  * between two runs would lose the overflow for challenge-matching purposes —
  * their XP is unaffected, because that comes from the counts in (1).
  *

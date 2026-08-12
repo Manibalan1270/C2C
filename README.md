@@ -19,6 +19,7 @@ src/                   the web app (React + Vite, deployed to Firebase Hosting)
   components/
     marketing/         public landing page
     members/           signed-in area, incl. admin/ and charts/
+    ui/                presentational, used by more than one surface
   pages/               one file per route
   hooks/               data access for components
   lib/                 Firebase, auth/theme context, queries, domain logic
@@ -69,7 +70,7 @@ so do the seed and promote scripts. Until that exists:
    Actions). The workflow in `.github/workflows/sync.yml` reads it from there.
 
 Then trigger a run by hand from the Actions tab ("Sync coding platforms" →
-Run workflow) rather than waiting up to 6 hours for the cron.
+Run workflow) rather than waiting for the next scheduled run (every 15 minutes).
 
 ---
 
@@ -114,7 +115,7 @@ endpoints:
 
 ```bash
 npm run check:sync                                  # includes the live feed check
-npx tsx scripts/__checks__/platforms.check.ts       # readers only
+npm run check:platforms       # readers only
 ```
 
 Members link their handles themselves on **/profile**. A typo'd handle

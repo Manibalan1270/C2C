@@ -26,27 +26,26 @@ them distinct is deliberate; they run in different places under different
 identities.
 
 ```
-                    ┌──────────────────────────────────────┐
-   Public visitor ──▶  src/          the web app            │
-   Club member    ──▶  (browser, Firestore rules apply)     │
-                    └───────────────┬──────────────────────┘
-                                    │ reads/writes as the signed-in user
-                                    ▼
-                    ┌──────────────────────────────────────┐
-                    │           Firestore                   │
-                    │  firestore.rules is the ONLY          │
-                    │  authorisation layer — there is no    │
-                    │  server in between                    │
-                    └───────▲───────────────────▲───────────┘
-                            │                   │
-        every 15 minutes    │                   │  on demand
-                    ┌───────┴────────┐  ┌───────┴────────────┐
-                    │  scripts/      │  │  api/              │
-                    │  the sync      │  │  serverless        │
-                    │  engine        │  │  endpoints         │
-                    │ (GitHub Action)│  │  (Vercel)          │
-                    └────────────────┘  └────────────────────┘
-                       Admin SDK — bypasses rules entirely
+                     ┌──────────────────────────────────────┐
+   Public visitor ──▶│  src/  — the web app                 │
+   Club member    ──▶│  browser; Firestore rules apply      │
+                     └──────────────────┬───────────────────┘
+                                        │ acts as the signed-in user
+                                        ▼
+                     ┌──────────────────────────────────────┐
+                     │  Firestore                           │
+                     │  firestore.rules is the ONLY         │
+                     │  authorisation layer — there is no   │
+                     │  server in between                   │
+                     └────────▲──────────────────▲──────────┘
+                              │                  │
+          every 15 minutes    │                  │    on demand
+                     ┌────────┴─────────┐ ┌──────┴───────────┐
+                     │  scripts/        │ │  api/            │
+                     │  the sync engine │ │  serverless      │
+                     │  (GitHub Action) │ │  (Vercel)        │
+                     └──────────────────┘ └──────────────────┘
+                        Admin SDK — bypasses rules entirely
 ```
 
 ### 1. `src/` — the web app
@@ -149,8 +148,9 @@ devtools console; reasoning about the rules file is not evidence, running it is.
 
 ## Known limits
 
-- **~100 members** before the 15-minute sync exceeds Firestore's free read
-  quota. Numbers and the mitigation are in `.github/workflows/sync.yml`.
+- **~120 members** before the 15-minute sync exceeds Firestore's free read
+  quota; 100 sits at ~81% and is the point to start watching. The full table
+  and the mitigation are in `.github/workflows/sync.yml`.
 - **20 recent submissions** is LeetCode's cap, so a member solving more than
   that between two syncs loses the overflow *for challenge matching only*.
 - **700KB per image**, enforced in the cropper, the query layer, and the rules.

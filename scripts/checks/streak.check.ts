@@ -1,7 +1,7 @@
 /**
  * Ad-hoc verification for the streak walker — the highest-risk pure logic in
  * the sync engine, since an off-by-one silently misreports every member's
- * streak. Run with: npx tsx scripts/__checks__/streak.check.ts
+ * streak. Run with: npx tsx scripts/checks/streak.check.ts
  */
 import { computeStreaks } from "../sync/progression";
 import { dayKey } from "../../src/lib/week";

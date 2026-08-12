@@ -1,7 +1,7 @@
 /**
  * C2C Firestore Data Schema — frozen contract (Sprint Plan Phase 1)
  *
- * Source of truth: C2C_SRS.pdf, section 7 "Database Collections".
+ * Source of truth: docs/C2C_SRS.pdf, section 7 "Database Collections".
  * DO NOT add/rename/remove a field without pinging the whole team first —
  * every feature branch is built against these exact shapes.
  *
@@ -75,16 +75,21 @@ export interface PlatformSolvedCounts {
 /**
  * The sync engine's bookmark per platform, so it can tell what's new.
  *
- * This exists because neither platform exposes per-submission history to a
- * logged-out reader any more — LeetCode's `recentAcSubmissionList` returns
- * an empty array without auth even for users with hundreds of solves. All
- * that's publicly readable is *lifetime counts*, so "what did they solve
- * since last time" has to be a delta against a stored previous count.
+ * Lifetime counts are the one thing EVERY public profile exposes, so "what
+ * did they solve since last time" is a delta against a stored previous count.
+ * That makes this bookmark the baseline path, working for every member
+ * regardless of their privacy settings.
  *
- * Consequence worth knowing: the engine knows how many problems a member
- * solved between two runs, but not which ones or exactly when. Awards are
- * therefore dated at sync time (accurate to the cron interval), and a solve
- * can't be automatically matched to a specific weekly challenge.
+ * This docblock used to claim per-problem history was auth-gated and that a
+ * solve could therefore never be matched to a challenge. That was wrong —
+ * `recentAcSubmissionList` is a per-account privacy setting, and challenge
+ * matching is built on it (scripts/sync/awardChallenges.ts). The correction is
+ * recorded rather than quietly deleted because the wrong version was believed
+ * for long enough to shape the schema around it.
+ *
+ * What remains true: a count delta carries no timestamp, so awards derived
+ * from THIS bookmark are dated at sync time. Challenge awards are dated at the
+ * real solve, because that feed does carry one.
  */
 export interface PlatformSyncState {
   leetcode?: PlatformSolvedCounts | null;

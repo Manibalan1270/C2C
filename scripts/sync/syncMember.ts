@@ -1,7 +1,7 @@
 /**
  * Sync one member. The single source of truth for what a sync actually does.
  *
- * Extracted from syncPlatforms.ts so two very different callers can share it
+ * Extracted from what is now scripts/cli/sync.ts so two very different callers can share it
  * without drifting:
  *   - the scheduled cron, which loops over every member
  *   - the on-demand API (api/sync.ts), which runs it for one member when they

@@ -11,6 +11,11 @@
   //
   // Referenced from tsconfig.json so plain `tsc -b` covers it.
   "compilerOptions": {
+    // Matches tsconfig.app.json and tsconfig.node.json. Without it, `tsc -b`
+    // drops tsconfig.server.tsbuildinfo — ~90KB of compiler state — into the
+    // repo root on every build. Ignoring that artifact treats the symptom;
+    // writing it where the other two already write theirs removes it.
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.server.tsbuildinfo",
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "bundler",

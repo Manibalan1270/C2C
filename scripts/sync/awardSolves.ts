@@ -8,13 +8,20 @@
  * current — writes nothing. That matters a lot when the runner is a cron
  * job that can overlap, retry, or fire twice.
  *
- * The counts come from the platform's own lifetime totals rather than a
- * submission feed, because that feed is auth-gated (see
- * lib/platforms/leetcode.ts). Two honest consequences:
- *   - Awards are dated at sync time, so day-bucketing is accurate to the
- *     cron interval rather than to the actual solve.
- *   - A solve can't be matched to a specific weekly challenge, because we
- *     never learn which problem it was.
+ * The counts come from the platform's own lifetime totals, which every public
+ * profile exposes. That is what makes this path the baseline: it works for
+ * every member regardless of their privacy settings.
+ *
+ * It does NOT mean per-problem history is unavailable. An earlier version of
+ * this comment claimed the submission feed was auth-gated and that a solve
+ * therefore could not be matched to a challenge; both were wrong, and
+ * awardChallenges.ts exists because they were wrong. `recentAcSubmissionList`
+ * is a per-account privacy setting, not an auth wall — see
+ * lib/platforms/leetcode.ts.
+ *
+ * One honest consequence remains: awards from THIS module are dated at sync
+ * time, because a count delta carries no timestamp. Challenge awards are dated
+ * at the real solve, because that feed does carry one.
  */
 import { FieldValue, Timestamp, type Firestore } from "firebase-admin/firestore";
 import {
@@ -166,7 +173,9 @@ export async function awardProgress(
     const body: PointsLogDoc = {
       logId: item.docId,
       uid,
-      // Can't attribute to a challenge — we never learn which problem it was.
+      // Null by construction: a count delta says how many, never which. The
+      // challenge attribution happens in awardChallenges.ts, which runs first
+      // and suppresses the generic award when it credits the same solve.
       challengeId: null,
       problem: item.problem,
       platform: item.platform,

@@ -4,7 +4,7 @@
  * The two things that can silently break auto-completion are slug extraction
  * (an admin pastes a URL shape we don't parse) and the live feed changing
  * shape. Both are covered here. Run with:
- *   npx tsx scripts/__checks__/challengeMatch.check.ts
+ *   npx tsx scripts/checks/challengeMatch.check.ts
  */
 import { slugFromProblemUrl, isMatchable } from "../../src/lib/problemSlug";
 import { fetchLeetCodeProgress, fetchLeetCodeRecentSolves } from "../lib/platforms/leetcode";
