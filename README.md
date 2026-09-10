@@ -38,39 +38,124 @@ firestore.rules        the ONLY authorisation layer — see ARCHITECTURE.md
 
 ---
 
-## The one thing that is not set up
+## Running it from scratch
 
-**Nothing has ever awarded XP, because the Admin SDK credential is missing.**
+Everything below is free. No billing card at any point.
 
-The LeetCode/HackerRank sync engine is fully built and verified working against
-the live endpoints, but it has never run. It needs a service-account key, and
-so do the seed and promote scripts. Until that exists:
+**You need:** Node 20 or newer (`node -v`), a Google account, and a GitHub
+account. That's it.
 
-| Blocked | Symptom |
+### 1. Get the code running against your own Firebase
+
+```bash
+git clone https://github.com/Manibalan1270/C2C.git
+cd C2C
+npm install
+```
+
+### 2. Create a Firebase project
+
+[console.firebase.google.com](https://console.firebase.google.com) → **Add
+project**. Decline Google Analytics unless you want it — nothing here depends
+on it.
+
+Then, inside the project:
+
+| Where | What to do |
 | --- | --- |
-| `npm run seed` | Fails immediately — no content can be seeded |
-| `npm run promote` | Fails — you cannot create the first admin from the CLI |
-| The scheduled sync | Never runs — every member sits at LV.1 / 0 XP forever |
-| Weekly leaderboard | Permanently empty (it reads snapshots the engine writes) |
+| Build → **Firestore Database** | Create database, **production mode**, pick a region near you |
+| Build → **Authentication** | Get started → enable **Google** as a sign-in provider |
+| ⚙️ → Project settings → **Your apps** | Add a **Web** app; copy the `firebaseConfig` values it shows you |
 
-### Fixing it
+Production mode is correct even for local development: this repo ships its own
+`firestore.rules`, and starting locked-down means you never accidentally run
+against a wide-open database.
 
-1. Firebase console → Project settings → **Service accounts** → *Generate new
-   private key*. You get a JSON file. It is a credential that bypasses all
-   Firestore rules — treat it like a password and never commit it.
+### 3. Fill in `.env`
 
-2. **For local scripts**, add it to `.env` as a single line:
+```bash
+cp .env.example .env
+```
 
-   ```
-   FIREBASE_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"..."}
-   ```
+Paste the seven `VITE_FIREBASE_*` values from the web app you just created.
 
-3. **For the scheduled sync**, add the same JSON as a GitHub repository secret
-   named `FIREBASE_SERVICE_ACCOUNT_JSON` (Settings → Secrets and variables →
-   Actions). The workflow in `.github/workflows/sync.yml` reads it from there.
+These are **not secrets**. They identify the project, they don't authorise
+anything — `firestore.rules` is what enforces access, and it is the only thing
+that does. They ship in the browser bundle by design.
 
-Then trigger a run by hand from the Actions tab ("Sync coding platforms" →
-Run workflow) rather than waiting for the next scheduled run (every 15 minutes).
+### 4. Restrict sign-in to your college (optional but recommended)
+
+`firestore.rules` only trusts `@svce.ac.in` addresses. To use a different
+domain, change `isCollegeAccount()` in that file. To allow anyone, replace the
+email check with `isSignedIn()`.
+
+### 5. Push the rules and indexes
+
+```bash
+npx firebase login
+npx firebase use --add          # pick the project you just created
+npm run deploy:rules
+```
+
+**Always deploy rules and indexes together** — they're one command for a
+reason. A rule permitting a query the index can't serve fails at runtime, and
+so does the reverse.
+
+### 6. Add the Admin SDK key
+
+This is the one real credential. It bypasses every Firestore rule, so treat it
+like a password: never commit it, never put it in a `VITE_`-prefixed variable
+(Vite inlines those into the browser bundle).
+
+Project settings → **Service accounts** → *Generate new private key*. You get a
+JSON file. Put its **entire contents on one line** in `.env`:
+
+```
+FIREBASE_SERVICE_ACCOUNT_JSON={"type":"service_account","project_id":"..."}
+```
+
+On Windows, this puts it on your clipboard without ever printing it:
+
+```powershell
+Get-Content "path	okey.json" -Raw | ConvertFrom-Json | ConvertTo-Json -Compress | Set-Clipboard
+```
+
+Without this key, `npm run seed`, `npm run promote` and `npm run sync` all fail
+immediately — they are the three commands that need admin access.
+
+### 7. Seed and start
+
+```bash
+npm run seed     # badges, this week's challenges, starter site content
+npm run dev      # http://localhost:5173
+```
+
+Most seeded content lands **unpublished** on purpose. It exists so the admin
+screens open with real rows to edit, not so the homepage fills itself with
+invented events.
+
+### 8. Make yourself an admin
+
+Roles can't be self-assigned — the rules forbid a client writing its own
+`role`, which is the entire point of having them. So the first admin is made
+from the CLI:
+
+```bash
+# Sign in through the app once FIRST. That is what creates your user document.
+npm run promote -- --email=you@svce.ac.in
+```
+
+Refresh, and an **Admin** tab appears in the members nav.
+
+### 9. Check it works
+
+```bash
+npm run check:all
+```
+
+Lint, typecheck, the sync logic, and 26 attack cases fired at your live
+Firestore rules. All of it runs without credentials except the last, which only
+needs the project to exist.
 
 ---
 
@@ -221,42 +306,22 @@ those into the browser bundle.
 
 ---
 
-## Setup
-
-```bash
-npm install
-cp .env.example .env     # fill in the VITE_FIREBASE_* values
-npm run dev              # http://localhost:5173
-```
-
-The seven `VITE_FIREBASE_*` values come from Firebase console → Project
-settings → Your apps. They are public by design (they identify the project,
-they do not authorise anything); Firestore rules are what enforce access.
-
-### First admin
-
-Roles cannot be self-assigned — the rules forbid a client writing its own
-`role`, which is the point. So the first admin is made from the CLI:
-
-```bash
-# Sign in through the app once first; that's what creates the user document.
-npm run promote -- --email=you@svce.ac.in
-```
-
----
-
 ## Commands
 
 | Command | What it does |
 | --- | --- |
-| `npm run dev` | Dev server |
+| `npm run dev` | Dev server on :5173 |
 | `npm run build` | Typecheck + production build |
 | `npm run lint` | ESLint |
+| `npm run check:all` | Lint + typecheck + logic + live security. Run this before shipping |
+| `npm run check:sync` | Sync logic + live LeetCode/HackerRank readers |
+| `npm run check:security` | 26 attack cases against the **live** deployed rules |
+| `npm run check:platforms` | Platform readers only |
+| `npm run check:rules` | Fuller rules suite vs the emulator (needs JDK 21) |
 | `npm run seed` | Badges, this week's challenges, starter site content |
-| `npm run seed:demo -- --uid=<uid>` | Adds synthetic pointsLog data for one user |
+| `npm run seed:demo -- --uid=<uid>` | Synthetic activity data for one member |
 | `npm run promote -- --email=…` | Grant admin |
 | `npm run sync` | Run the platform sync locally (`-- --dry-run` to read only) |
-| `npm run check:sync` | Unit checks for streak/award logic |
 | `npm run deploy:rules` | Deploy Firestore rules **and** indexes |
 
 Deploy the site:

@@ -138,7 +138,7 @@ export default function Carousel<T>({ items, renderItem, tone = "light" }: Carou
         </button>
       </div>
 
-      <div className="mt-6 flex items-center gap-2">
+      <div className="mt-5 flex items-center gap-2">
         {items.map((_, i) => (
           <button
             key={i}

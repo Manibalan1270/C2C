@@ -26,7 +26,7 @@ function MarqueeRow() {
 
 export default function ContactFooter() {
   return (
-    <footer id="contact" className="relative overflow-hidden bg-void py-24 text-void-text">
+    <footer id="contact" className="relative overflow-hidden bg-void py-12 text-void-text">
       {/* Ambient glow, purely decorative */}
       <div className="animate-aurora pointer-events-none absolute left-1/2 top-1/2 h-[50vh] w-[70vw] rounded-full bg-accent/20 blur-[100px]" />
 
@@ -51,9 +51,9 @@ export default function ContactFooter() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.7 }}
-        className="relative z-10 mx-auto mt-16 flex max-w-3xl flex-col items-center px-6 text-center"
+        className="relative z-10 mx-auto mt-10 flex max-w-3xl flex-col items-center px-6 text-center"
       >
-        <h2 className="font-display text-4xl font-bold tracking-tight sm:text-6xl">
+        <h2 className="font-display text-3xl font-bold tracking-tight sm:text-5xl">
           Ready to compete?
         </h2>
         <p className="mt-4 max-w-md text-void-muted">
@@ -66,7 +66,7 @@ export default function ContactFooter() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6, delay: 0.15 }}
-          className="mt-8 flex items-center justify-center gap-4"
+          className="mt-6 flex items-center justify-center gap-4"
         >
           {SOCIAL_LINKS.map(({ label, href, Icon }) => (
             <motion.a
@@ -77,7 +77,7 @@ export default function ContactFooter() {
               whileHover={{ scale: 1.15, y: -4, rotate: -6 }}
               whileTap={{ scale: 0.94 }}
               transition={{ type: "spring", stiffness: 400, damping: 12 }}
-              className="group relative flex h-14 w-14 items-center justify-center rounded-full border border-white/15 text-void-text transition-colors hover:border-accent hover:bg-accent/10 hover:text-accent"
+              className="group relative flex h-12 w-12 items-center justify-center rounded-full border border-white/15 text-void-text transition-colors hover:border-accent hover:bg-accent/10 hover:text-accent"
             >
               <span className="pointer-events-none absolute inset-0 rounded-full bg-accent/20 opacity-0 blur-md transition-opacity duration-300 group-hover:opacity-100" />
               <Icon className="relative h-5 w-5" />
@@ -86,7 +86,7 @@ export default function ContactFooter() {
         </motion.div>
       </motion.div>
 
-      <div className="relative z-10 mx-auto mt-20 flex max-w-5xl items-center justify-between px-6 font-mono text-xs text-void-muted">
+      <div className="relative z-10 mx-auto mt-12 flex max-w-5xl items-center justify-between px-6 font-mono text-xs text-void-muted">
         <span>&copy; {new Date().getFullYear()} C2C Programming Club</span>
         <button
           type="button"

@@ -51,7 +51,7 @@ export default function BoardMembers() {
   }, []);
 
   return (
-    <section id="board" className="py-24">
+    <section id="board" className="py-12 sm:py-16">
       <div className="mx-auto max-w-5xl px-6">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -68,7 +68,7 @@ export default function BoardMembers() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.2 }}
         transition={{ duration: 0.6, delay: 0.1 }}
-        className="mt-10"
+        className="mt-8"
       >
         <InfiniteSlider gap={40} duration={28} durationOnHover={70} className="py-4">
           {members.map((member) => {
